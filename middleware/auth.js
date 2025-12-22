@@ -49,14 +49,14 @@ module.exports = {
     if (!req.isAuthenticated()) {
       return next();
     }
+    // Allaqachon login qilgan - o'z paneliga yo'naltirish
     if (req.user.role === 'admin') {
       return res.redirect('/admin');
-    } else {
-      if (!req.user.is_approved) {
-        return res.redirect('/auth/pending');
-      }
-      return res.redirect('/doctor');
     }
+    if (!req.user.is_approved) {
+      return res.redirect('/auth/pending');
+    }
+    return res.redirect('/doctor');
   },
 
   // Faqat Admin

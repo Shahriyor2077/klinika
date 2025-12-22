@@ -18,7 +18,7 @@ router.post('/admin/login', loginLimiter, (req, res, next) => {
     if (err) return next(err);
 
     if (!user) {
-      req.flash('error_msg', info.message);
+      req.flash('error_msg', info ? info.message : 'Login yoki parol noto\'g\'ri');
       return res.redirect('/auth/admin/login');
     }
 
@@ -28,7 +28,10 @@ router.post('/admin/login', loginLimiter, (req, res, next) => {
     }
 
     req.logIn(user, (err) => {
-      if (err) return next(err);
+      if (err) {
+        console.error('Login error:', err);
+        return next(err);
+      }
       return res.redirect('/admin');
     });
   })(req, res, next);
