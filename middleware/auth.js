@@ -2,27 +2,30 @@ const rateLimit = require('express-rate-limit');
 
 // Login rate limiting
 const loginLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 daqiqa
-  max: 5, // 5 ta urinish
-  message: 'Juda ko\'p urinish. 15 daqiqadan keyin qayta urinib ko\'ring.',
+  windowMs: 15 * 60 * 1000,
+  max: 100, // Ko'proq urinish
+  message: 'Juda ko\'p urinish. Keyinroq qayta urinib ko\'ring.',
   standardHeaders: true,
   legacyHeaders: false,
+  skip: () => process.env.NODE_ENV === 'development'
 });
 
 // OTP rate limiting
 const otpLimiter = rateLimit({
-  windowMs: 60 * 1000, // 1 daqiqa
-  max: 1, // 1 ta SMS
-  message: 'SMS yuborish uchun 1 daqiqa kuting.',
+  windowMs: 60 * 1000,
+  max: 10, // Ko'proq
+  message: 'SMS yuborish uchun biroz kuting.',
   standardHeaders: true,
   legacyHeaders: false,
+  skip: () => process.env.NODE_ENV === 'development'
 });
 
 // API rate limiting
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100,
-  message: { error: 'Juda ko\'p so\'rov. Keyinroq urinib ko\'ring.' }
+  max: 500,
+  message: { error: 'Juda ko\'p so\'rov. Keyinroq urinib ko\'ring.' },
+  skip: () => process.env.NODE_ENV === 'development'
 });
 
 module.exports = {
