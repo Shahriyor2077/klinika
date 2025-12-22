@@ -1,0 +1,29 @@
+{{#if success_msg}}
+<div class="alert alert-success">{{success_msg}}</div>
+{{/if}}
+{{#if error_msg}}
+<div class="alert alert-danger">{{error_msg}}</div>
+{{/if}}
+{{#if error}}
+<div class="alert alert-danger">{{error}}</div>
+{{/if}}
+
+<form action="/auth/doctor/login" method="POST">
+    <div class="form-group">
+        <label>Telefon raqam</label>
+        <input type="text" name="phone" placeholder="+998 90 123 45 67" required>
+    </div>
+    <div class="form-group">
+        <label>Parol</label>
+        <input type="password" name="password" placeholder="Parolingiz" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Kirish</button>
+</form>
+
+<div class="auth-footer" style="margin-top: 16px;">
+    <a href="/auth/forgot-password">Parolni unutdingizmi?</a>
+</div>
+
+<div class="auth-footer">
+    Hisobingiz yo'qmi? <a href="/auth/doctor/register">Ro'yxatdan o'ting</a>
+</div>

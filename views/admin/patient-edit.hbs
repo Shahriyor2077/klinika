@@ -1,0 +1,151 @@
+{{> admin-sidebar activePage="patients"}}
+
+<div class="main-content">
+    {{> alerts}}
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold m-0"><i class="bi bi-pencil me-2"></i>Bemorni tahrirlash</h2>
+        <a href="/admin/patients" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-2"></i>Orqaga
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+            <form method="POST" action="/admin/patients/edit/{{patient._id}}">
+                <div class="row g-4">
+                    <div class="col-lg-4">
+                        <h6 class="text-primary fw-bold mb-3 border-bottom pb-2">Asosiy ma'lumotlar</h6>
+                        <div class="mb-3">
+                            <label class="form-label">Bemor kodi</label>
+                            <input type="text" class="form-control" value="{{patient.patient_code}}" disabled>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">F.I.O <span class="text-danger">*</span></label>
+                            <input type="text" name="name" class="form-control" value="{{patient.name}}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Tibbiy karta raqami</label>
+                            <input type="text" name="card_number" class="form-control" value="{{patient.card_number}}">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Jinsi <span class="text-danger">*</span></label>
+                            <select name="sex" class="form-select" required>
+                                <option value="male" {{selected patient.sex "male" }}>Erkak</option>
+                                <option value="female" {{selected patient.sex "female" }}>Ayol</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Tug'ilgan sanasi <span class="text-danger">*</span></label>
+                            <input type="date" name="birthday" class="form-control"
+                                value="{{formatDate patient.birthday 'input'}}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Yoshi <span class="text-danger">*</span></label>
+                            <input type="number" name="age" class="form-control" value="{{patient.age}}" min="0"
+                                max="150" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">PNFL (14 raqam) <span class="text-danger">*</span></label>
+                            <input type="text" name="child_pnfl" class="form-control" value="{{patient.child_pnfl}}"
+                                maxlength="14" pattern="\d{14}" title="PNFL 14 ta raqamdan iborat bo'lishi kerak"
+                                required>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4">
+                        <h6 class="text-primary fw-bold mb-3 border-bottom pb-2">Ota-ona ma'lumotlari</h6>
+                        <div class="mb-3">
+                            <label class="form-label">Onasining F.I.O <span class="text-danger">*</span></label>
+                            <input type="text" name="mother_name" class="form-control" value="{{patient.mother_name}}"
+                                required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Onasining ID raqami <span class="text-danger">*</span></label>
+                            <input type="text" name="mother_id_number" class="form-control"
+                                value="{{patient.mother_id_number}}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Onasining ish joyi</label>
+                            <input type="text" name="mother_work_place" class="form-control"
+                                value="{{patient.mother_work_place}}">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Otasining F.I.O <span class="text-danger">*</span></label>
+                            <input type="text" name="father_name" class="form-control" value="{{patient.father_name}}"
+                                required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Otasining ID raqami <span class="text-danger">*</span></label>
+                            <input type="text" name="father_id_number" class="form-control"
+                                value="{{patient.father_id_number}}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Otasining ish joyi</label>
+                            <input type="text" name="father_work_place" class="form-control"
+                                value="{{patient.father_work_place}}">
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4">
+                        <h6 class="text-primary fw-bold mb-3 border-bottom pb-2">Manzil va Aloqa</h6>
+                        <div class="mb-3">
+                            <label class="form-label">Viloyat <span class="text-danger">*</span></label>
+                            <select name="region" class="form-select" required>
+                                <option value="andijon" {{selected patient.region "andijon" }}>Andijon</option>
+                                <option value="buxoro" {{selected patient.region "buxoro" }}>Buxoro</option>
+                                <option value="fargona" {{selected patient.region "fargona" }}>Farg'ona</option>
+                                <option value="jizzax" {{selected patient.region "jizzax" }}>Jizzax</option>
+                                <option value="xorazm" {{selected patient.region "xorazm" }}>Xorazm</option>
+                                <option value="namangan" {{selected patient.region "namangan" }}>Namangan</option>
+                                <option value="navoiy" {{selected patient.region "navoiy" }}>Navoiy</option>
+                                <option value="qashqadaryo" {{selected patient.region "qashqadaryo" }}>Qashqadaryo
+                                </option>
+                                <option value="samarqand" {{selected patient.region "samarqand" }}>Samarqand</option>
+                                <option value="sirdaryo" {{selected patient.region "sirdaryo" }}>Sirdaryo</option>
+                                <option value="surxondaryo" {{selected patient.region "surxondaryo" }}>Surxondaryo
+                                </option>
+                                <option value="toshkent_vil" {{selected patient.region "toshkent_vil" }}>Toshkent
+                                    viloyati</option>
+                                <option value="toshkent_sh" {{selected patient.region "toshkent_sh" }}>Toshkent shahri
+                                </option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Tuman <span class="text-danger">*</span></label>
+                            <input type="text" name="district" class="form-control" value="{{patient.district}}"
+                                required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">To'liq manzil <span class="text-danger">*</span></label>
+                            <textarea name="full_address" class="form-control" rows="3"
+                                required>{{patient.full_address}}</textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Asosiy telefon <span class="text-danger">*</span></label>
+                            <input type="text" name="phone_number" class="form-control" value="{{patient.phone_number}}"
+                                required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Qo'shimcha telefon</label>
+                            <input type="text" name="second_number" class="form-control"
+                                value="{{patient.second_number}}">
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="related_marriage"
+                                id="related_marriage" {{#if patient.related_marriage}}checked{{/if}}>
+                            <label class="form-check-label" for="related_marriage">Qarindoshlar nikohimi?</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-3 border-top text-end">
+                    <a href="/admin/patients" class="btn btn-light px-4 me-2">Bekor qilish</a>
+                    <button type="submit" class="btn btn-primary px-5">
+                        <i class="bi bi-check-lg me-2"></i>Saqlash
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

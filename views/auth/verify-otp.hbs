@@ -1,0 +1,36 @@
+{{#if errors}}
+{{#each errors}}
+<div class="alert alert-danger">{{this.msg}}</div>
+{{/each}}
+{{/if}}
+{{#if success_msg}}
+<div class="alert alert-success">{{success_msg}}</div>
+{{/if}}
+
+<p style="color: rgba(255,255,255,0.7); font-size: 14px; margin-bottom: 24px;">
+    <strong>{{phone}}</strong> raqamiga 6 xonali kod yuborildi
+</p>
+
+<form action="/auth/doctor/verify-otp" method="POST">
+    <input type="hidden" name="phone" value="{{phone}}">
+    <input type="hidden" name="sessionToken" value="{{sessionToken}}">
+
+    <div class="form-group">
+        <label>Tasdiqlash kodi</label>
+        <input type="text" name="otp" placeholder="6 xonali kod" maxlength="6" pattern="\d{6}" required autofocus
+            style="text-align: center; font-size: 20px; letter-spacing: 8px;">
+    </div>
+    <button type="submit" class="btn btn-primary">Tasdiqlash</button>
+</form>
+
+<form action="/auth/doctor/resend-otp" method="POST" style="margin-top: 16px;">
+    <input type="hidden" name="phone" value="{{phone}}">
+    <input type="hidden" name="sessionToken" value="{{sessionToken}}">
+    <button type="submit" class="btn" style="background: transparent; color: #818cf8; width: 100%;">
+        Kodni qayta yuborish
+    </button>
+</form>
+
+<div class="auth-footer">
+    <a href="/auth/doctor/register">← Orqaga qaytish</a>
+</div>

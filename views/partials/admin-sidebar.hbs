@@ -1,0 +1,55 @@
+<div class="sidebar">
+    <div class="sidebar-header">
+        <a href="/admin" class="sidebar-brand">
+            <i class="bi bi-shield-lock-fill"></i>
+            <span>Admin Panel</span>
+        </a>
+    </div>
+
+    <div class="sidebar-user d-flex align-items-center">
+        <div class="user-avatar">
+            {{#if user.name}}{{substring user.name 0 1}}{{else}}A{{/if}}
+        </div>
+        <div class="user-info">
+            <div class="user-name">{{user.name}}</div>
+            <div class="user-role">Administrator</div>
+        </div>
+    </div>
+
+    <nav class="sidebar-nav">
+        <div class="nav-section">
+            <div class="nav-section-title">Asosiy</div>
+            <a href="/admin" class="nav-link-custom {{#eq activePage 'dashboard'}}active{{/eq}}">
+                <i class="bi bi-grid-1x2-fill"></i>
+                <span>Dashboard</span>
+            </a>
+        </div>
+
+        <div class="nav-section">
+            <div class="nav-section-title">Boshqaruv</div>
+            <a href="/admin/users" class="nav-link-custom {{#eq activePage 'users'}}active{{/eq}}">
+                <i class="bi bi-people-fill"></i>
+                <span>Shifokorlar</span>
+            </a>
+            <a href="/admin/patients" class="nav-link-custom {{#eq activePage 'patients'}}active{{/eq}}">
+                <i class="bi bi-person-vcard"></i>
+                <span>Bemorlar</span>
+            </a>
+            <a href="/admin/diagnoses" class="nav-link-custom {{#eq activePage 'diagnoses'}}active{{/eq}}">
+                <i class="bi bi-clipboard2-pulse"></i>
+                <span>Tashxislar</span>
+            </a>
+            <a href="/admin/drugs" class="nav-link-custom {{#eq activePage 'drugs'}}active{{/eq}}">
+                <i class="bi bi-capsule"></i>
+                <span>Dorilar</span>
+            </a>
+        </div>
+    </nav>
+
+    <div class="sidebar-footer">
+        <a href="/auth/logout" class="nav-link-custom text-danger">
+            <i class="bi bi-box-arrow-right"></i>
+            <span>Chiqish</span>
+        </a>
+    </div>
+</div>

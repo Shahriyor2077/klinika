@@ -1,0 +1,32 @@
+<div class="text-center">
+    <div class="mb-4">
+        <div class="d-inline-flex align-items-center justify-content-center"
+            style="width: 100px; height: 100px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border-radius: 28px;">
+            <i class="bi bi-hourglass-split text-white" style="font-size: 48px;"></i>
+        </div>
+    </div>
+
+    <h4 class="mb-3 fw-bold">Admin tasdiqlashini kuting</h4>
+
+    <p class="text-muted mb-4">
+        Hurmatli <strong class="text-dark">{{user.name}}</strong>,<br>
+        sizning hisobingiz hali tasdiqlanmagan.
+    </p>
+
+    <div class="alert alert-warning text-start">
+        <div class="d-flex align-items-start">
+            <i class="bi bi-clock-history me-3 fs-4"></i>
+            <div>
+                <strong>Tasdiqlash jarayoni</strong>
+                <p class="mb-0 small">Admin tasdiqlashidan so'ng tizimga kirishingiz mumkin bo'ladi. Odatda bu 24 soat
+                    ichida amalga oshiriladi.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-grid gap-2 mt-4">
+        <a href="/auth/logout" class="btn btn-outline-danger py-2">
+            <i class="bi bi-box-arrow-right me-2"></i>Chiqish
+        </a>
+    </div>
+</div>

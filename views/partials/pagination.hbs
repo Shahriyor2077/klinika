@@ -1,0 +1,29 @@
+{{#if pagination}}
+{{#if (gt pagination.totalPages 1)}}
+<nav class="mt-4">
+    <ul class="pagination justify-content-center">
+        <li class="page-item {{#unless pagination.hasPrev}}disabled{{/unless}}">
+            <a class="page-link"
+                href="?page={{add pagination.page -1}}{{#if search}}&search={{search}}{{/if}}{{#if region}}&region={{region}}{{/if}}{{#if sex}}&sex={{sex}}{{/if}}{{#if status}}&status={{status}}{{/if}}">
+                <i class="bi bi-chevron-left"></i>
+            </a>
+        </li>
+
+        {{#each (range 1 pagination.totalPages)}}
+        <li class="page-item {{#eq this ../pagination.page}}active{{/eq}}">
+            <a class="page-link"
+                href="?page={{this}}{{#if ../search}}&search={{../search}}{{/if}}{{#if ../region}}&region={{../region}}{{/if}}{{#if ../sex}}&sex={{../sex}}{{/if}}{{#if ../status}}&status={{../status}}{{/if}}">{{this}}</a>
+        </li>
+        {{/each}}
+
+        <li class="page-item {{#unless pagination.hasNext}}disabled{{/unless}}">
+            <a class="page-link"
+                href="?page={{add pagination.page 1}}{{#if search}}&search={{search}}{{/if}}{{#if region}}&region={{region}}{{/if}}{{#if sex}}&sex={{sex}}{{/if}}{{#if status}}&status={{status}}{{/if}}">
+                <i class="bi bi-chevron-right"></i>
+            </a>
+        </li>
+    </ul>
+    <p class="text-center text-muted small">Jami: {{pagination.total}} ta</p>
+</nav>
+{{/if}}
+{{/if}}

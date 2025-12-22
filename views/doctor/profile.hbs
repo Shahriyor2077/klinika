@@ -1,0 +1,105 @@
+{{> doctor-sidebar activePage="profile"}}
+
+<div class="main-content">
+    {{> alerts}}
+
+    <div class="page-header">
+        <h1 class="page-title"><i class="bi bi-person-gear me-2"></i>Profil sozlamalari</h1>
+        <p class="page-subtitle">Shaxsiy ma'lumotlaringizni tahrirlang</p>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="m-0"><i class="bi bi-person me-2"></i>Asosiy ma'lumotlar</h6>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="/doctor/profile">
+                        <div class="mb-3">
+                            <label class="form-label">F.I.O</label>
+                            <input type="text" name="name" class="form-control" value="{{user.name}}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Telefon raqam</label>
+                            <input type="text" class="form-control" value="{{user.phone}}" disabled>
+                            <small class="text-muted">Telefon raqamni o'zgartirib bo'lmaydi</small>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Ish joyi</label>
+                            <input type="text" name="address" class="form-control" value="{{user.address}}" required>
+                        </div>
+
+                        <hr class="my-4">
+                        <h6 class="text-muted mb-3">Parolni o'zgartirish (ixtiyoriy)</h6>
+
+                        <div class="mb-3">
+                            <label class="form-label">Joriy parol</label>
+                            <input type="password" name="current_password" class="form-control"
+                                placeholder="Joriy parolingiz">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Yangi parol</label>
+                            <input type="password" name="new_password" class="form-control"
+                                placeholder="Kamida 6 ta belgi" minlength="6">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Yangi parolni tasdiqlang</label>
+                            <input type="password" name="new_password2" class="form-control"
+                                placeholder="Yangi parolni qayta kiriting">
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-check-lg me-2"></i>Saqlash
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light">
+                    <h6 class="m-0"><i class="bi bi-info-circle me-2"></i>Hisob ma'lumotlari</h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="avatar me-3"
+                            style="width: 64px; height: 64px; background: linear-gradient(135deg, #4f46e5, #7c3aed); border-radius: 16px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 24px; font-weight: 700;">
+                            {{substring user.name 0 1}}
+                        </div>
+                        <div>
+                            <h5 class="mb-1">{{user.name}}</h5>
+                            <span class="badge bg-success">Shifokor</span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 p-3 bg-light rounded">
+                        <small class="text-muted d-block">Holat</small>
+                        {{#if user.is_approved}}
+                        <span class="text-success fw-semibold"><i
+                                class="bi bi-check-circle me-1"></i>Tasdiqlangan</span>
+                        {{else}}
+                        <span class="text-warning fw-semibold"><i class="bi bi-clock me-1"></i>Kutilmoqda</span>
+                        {{/if}}
+                    </div>
+
+                    <div class="mb-3 p-3 bg-light rounded">
+                        <small class="text-muted d-block">Excel eksport</small>
+                        {{#if user.can_export}}
+                        <span class="text-success fw-semibold"><i class="bi bi-check-circle me-1"></i>Ruxsat
+                            berilgan</span>
+                        {{else}}
+                        <span class="text-muted fw-semibold"><i class="bi bi-x-circle me-1"></i>Ruxsat yo'q</span>
+                        {{/if}}
+                    </div>
+
+                    <div class="mb-3 p-3 bg-light rounded">
+                        <small class="text-muted d-block">Ro'yxatdan o'tgan sana</small>
+                        <span class="fw-semibold">{{formatDate user.created_at}}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

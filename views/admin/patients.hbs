@@ -1,0 +1,195 @@
+{{> admin-sidebar activePage="patients"}}
+
+<div class="main-content">
+    {{> alerts}}
+
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <h2 class="fw-bold m-0"><i class="bi bi-people me-2"></i>Bemorlar</h2>
+        <a href="/admin/patients/export?region={{region}}&sex={{sex}}" class="btn btn-success">
+            <i class="bi bi-file-earmark-excel me-2"></i>Excel yuklab olish
+        </a>
+    </div>
+
+    <!-- Qidiruv -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form action="/admin/patients" method="GET" class="row g-3">
+                <div class="col-md-4">
+                    <input type="text" name="search" class="form-control" placeholder="Ism, PNFL yoki kod..."
+                        value="{{search}}">
+                </div>
+                <div class="col-md-3">
+                    <select name="region" class="form-select">
+                        <option value="">Barcha viloyatlar</option>
+                        <option value="andijon" {{selected region "andijon" }}>Andijon</option>
+                        <option value="buxoro" {{selected region "buxoro" }}>Buxoro</option>
+                        <option value="fargona" {{selected region "fargona" }}>Farg'ona</option>
+                        <option value="jizzax" {{selected region "jizzax" }}>Jizzax</option>
+                        <option value="xorazm" {{selected region "xorazm" }}>Xorazm</option>
+                        <option value="namangan" {{selected region "namangan" }}>Namangan</option>
+                        <option value="navoiy" {{selected region "navoiy" }}>Navoiy</option>
+                        <option value="qashqadaryo" {{selected region "qashqadaryo" }}>Qashqadaryo</option>
+                        <option value="samarqand" {{selected region "samarqand" }}>Samarqand</option>
+                        <option value="sirdaryo" {{selected region "sirdaryo" }}>Sirdaryo</option>
+                        <option value="surxondaryo" {{selected region "surxondaryo" }}>Surxondaryo</option>
+                        <option value="toshkent_vil" {{selected region "toshkent_vil" }}>Toshkent viloyati</option>
+                        <option value="toshkent_sh" {{selected region "toshkent_sh" }}>Toshkent shahri</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select name="sex" class="form-select">
+                        <option value="">Barcha jins</option>
+                        <option value="male" {{selected sex "male" }}>Erkak</option>
+                        <option value="female" {{selected sex "female" }}>Ayol</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary me-2"><i class="bi bi-search"></i> Qidirish</button>
+                    <a href="/admin/patients" class="btn btn-outline-secondary">Tozalash</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Kod</th>
+                            <th>Ism</th>
+                            <th>PNFL</th>
+                            <th>Jinsi</th>
+                            <th>Viloyat</th>
+                            <th>Telefon</th>
+                            <th>Sana</th>
+                            <th>Amallar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#each patients}}
+                        <tr>
+                            <td><span class="badge bg-primary">{{this.patient_code}}</span></td>
+                            <td class="fw-semibold">{{this.name}}</td>
+                            <td><code>{{this.child_pnfl}}</code></td>
+                            <td>{{getSex this.sex}}</td>
+                            <td>{{getRegionName this.region}}</td>
+                            <td>{{this.phone_number}}</td>
+                            <td>{{formatDate this.patient_add_date}}</td>
+                            <td>
+                                <div class="d-flex gap-1">
+                                    <a href="/admin/patients/edit/{{this._id}}" class="btn btn-sm btn-primary"
+                                        title="Tahrirlash">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-sm btn-info" title="Ko'rish"
+                                        onclick="viewPatient('{{this._id}}')">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                    <form action="/admin/patients/delete/{{this._id}}?_method=DELETE" method="POST"
+                                        class="d-inline">
+                                        <button type="button" class="btn btn-sm btn-danger" title="O'chirish"
+                                            data-confirm="Bemor va uning barcha tashxislari o'chiriladi. Davom etasizmi?">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {{else}}
+                        <tr>
+                            <td colspan="8" class="text-center text-muted py-4">Bemorlar topilmadi</td>
+                        </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+            </div>
+
+            {{> pagination}}
+        </div>
+    </div>
+</div>
+
+<!-- Bemor ko'rish Modal -->
+<div class="modal fade" id="viewPatientModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 16px; border: none;">
+            <div class="modal-header bg-primary text-white" style="border-radius: 16px 16px 0 0;">
+                <h5 class="modal-title fw-bold"><i class="bi bi-person-fill me-2"></i><span
+                        id="patientName">Bemor</span></h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4" id="patientModalBody">
+                <div class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let viewPatientModal;
+    const regionNames = {
+        'andijon': 'Andijon viloyati', 'buxoro': 'Buxoro viloyati', 'fargona': "Farg'ona viloyati",
+        'jizzax': 'Jizzax viloyati', 'xorazm': 'Xorazm viloyati', 'namangan': 'Namangan viloyati',
+        'navoiy': 'Navoiy viloyati', 'qashqadaryo': 'Qashqadaryo viloyati', 'samarqand': 'Samarqand viloyati',
+        'sirdaryo': 'Sirdaryo viloyati', 'surxondaryo': 'Surxondaryo viloyati',
+        'toshkent_vil': 'Toshkent viloyati', 'toshkent_sh': 'Toshkent shahri'
+    };
+
+    document.addEventListener('DOMContentLoaded', function () {
+        viewPatientModal = new bootstrap.Modal(document.getElementById('viewPatientModal'));
+    });
+
+    function viewPatient(id) {
+        if (!viewPatientModal) {
+            viewPatientModal = new bootstrap.Modal(document.getElementById('viewPatientModal'));
+        }
+        document.getElementById('patientModalBody').innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary"></div></div>';
+        viewPatientModal.show();
+
+        fetch('/admin/patients/view/' + id)
+            .then(res => res.json())
+            .then(data => {
+                const p = data.patient;
+                const d = data.diagnoses;
+                let html = `
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="mb-3"><small class="text-muted">Kod</small><div class="fw-bold">${p.patient_code}</div></div>
+                        <div class="mb-3"><small class="text-muted">PNFL</small><div class="fw-bold">${p.child_pnfl}</div></div>
+                        <div class="mb-3"><small class="text-muted">Jinsi</small><div>${p.sex === 'male' ? 'Erkak' : 'Ayol'}</div></div>
+                        <div class="mb-3"><small class="text-muted">Yoshi</small><div>${p.age} yosh</div></div>
+                        <div class="mb-3"><small class="text-muted">Viloyat</small><div>${regionNames[p.region] || p.region}</div></div>
+                        <div class="mb-3"><small class="text-muted">Tuman</small><div>${p.district}</div></div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3"><small class="text-muted">Telefon</small><div class="fw-bold">${p.phone_number}</div></div>
+                        <div class="mb-3"><small class="text-muted">Ona</small><div>${p.mother_name}</div></div>
+                        <div class="mb-3"><small class="text-muted">Ota</small><div>${p.father_name}</div></div>
+                        <div class="mb-3"><small class="text-muted">Manzil</small><div>${p.full_address}</div></div>
+                        <div class="mb-3"><small class="text-muted">Qarindosh nikoh</small><div>${p.related_marriage ? 'Ha' : "Yo'q"}</div></div>
+                    </div>
+                </div>`;
+
+                if (d && d.length > 0) {
+                    html += '<hr><h6 class="fw-bold mb-3"><i class="bi bi-clipboard2-pulse me-2"></i>Tashxislar (' + d.length + ' ta)</h6>';
+                    html += '<div class="table-responsive"><table class="table table-sm"><thead><tr><th>Sana</th><th>Shifokor</th><th>Tashxis</th><th>Vazn/Bo\'y</th></tr></thead><tbody>';
+                    d.forEach(diag => {
+                        const date = new Date(diag.created_at).toLocaleDateString('uz-UZ');
+                        const doctorName = diag.doctor ? diag.doctor.name : '-';
+                        html += `<tr><td>${date}</td><td class="text-primary">${doctorName}</td><td>${diag.tashxis}</td><td>${diag.ogirligi} kg / ${diag.boyi} sm</td></tr>`;
+                    });
+                    html += '</tbody></table></div>';
+                }
+
+                document.getElementById('patientName').textContent = p.name;
+                document.getElementById('patientModalBody').innerHTML = html;
+            })
+            .catch(err => {
+                document.getElementById('patientModalBody').innerHTML = '<div class="text-center text-danger py-4">Xatolik yuz berdi</div>';
+            });
+    }
+</script>

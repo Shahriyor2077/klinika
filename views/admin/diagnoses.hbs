@@ -1,0 +1,193 @@
+{{> admin-sidebar activePage="diagnoses"}}
+
+<div class="main-content">
+    {{> alerts}}
+
+    <h2 class="fw-bold mb-4"><i class="bi bi-clipboard2-pulse me-2"></i>Tashxislar</h2>
+
+    <!-- Qidiruv -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form action="/admin/diagnoses" method="GET" class="row g-3">
+                <div class="col-md-6">
+                    <input type="text" name="search" class="form-control" placeholder="Bemor ismi, PNFL yoki kodi..."
+                        value="{{search}}">
+                </div>
+                <div class="col-md-6">
+                    <button type="submit" class="btn btn-primary me-2"><i class="bi bi-search"></i> Qidirish</button>
+                    <a href="/admin/diagnoses" class="btn btn-outline-secondary">Tozalash</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Bemor</th>
+                            <th>PNFL</th>
+                            <th>Shifokor</th>
+                            <th>Tashxis</th>
+                            <th>Vazn/Bo'y</th>
+                            <th>Sana</th>
+                            <th>Amallar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#each diagnoses}}
+                        <tr>
+                            <td>
+                                <span class="badge bg-primary me-1">{{this.patient.patient_code}}</span>
+                                {{this.patient.name}}
+                            </td>
+                            <td><code>{{this.patient.child_pnfl}}</code></td>
+                            <td><span class="text-primary fw-semibold">{{this.doctor.name}}</span></td>
+                            <td>
+                                <span class="d-inline-block text-truncate" style="max-width: 200px;"
+                                    title="{{this.tashxis}}">
+                                    {{this.tashxis}}
+                                </span>
+                            </td>
+                            <td>{{this.ogirligi}} kg / {{this.boyi}} sm</td>
+                            <td>{{formatDate this.created_at}}</td>
+                            <td>
+                                <div class="d-flex gap-1">
+                                    <button type="button" class="btn btn-sm btn-info" title="Ko'rish"
+                                        onclick="viewDiagnosis('{{this._id}}')">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                    <a href="/admin/diagnoses/edit/{{this._id}}" class="btn btn-sm btn-primary"
+                                        title="Tahrirlash">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <form action="/admin/diagnoses/delete/{{this._id}}?_method=DELETE" method="POST"
+                                        class="d-inline">
+                                        <button type="button" class="btn btn-sm btn-danger" title="O'chirish"
+                                            data-confirm="Tashxisni o'chirmoqchimisiz?">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {{else}}
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-4">Tashxislar topilmadi</td>
+                        </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+            </div>
+
+            {{> pagination}}
+        </div>
+    </div>
+</div>
+
+<!-- Tashxis ko'rish Modal -->
+<div class="modal fade" id="viewDiagnosisModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 16px; border: none;">
+            <div class="modal-header bg-success text-white" style="border-radius: 16px 16px 0 0;">
+                <h5 class="modal-title fw-bold"><i class="bi bi-clipboard2-pulse me-2"></i>Tashxis ma'lumotlari</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4" id="diagnosisModalBody">
+                <div class="text-center py-4">
+                    <div class="spinner-border text-success"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let viewDiagnosisModal;
+
+    document.addEventListener('DOMContentLoaded', function () {
+        viewDiagnosisModal = new bootstrap.Modal(document.getElementById('viewDiagnosisModal'));
+    });
+
+    function viewDiagnosis(id) {
+        if (!viewDiagnosisModal) {
+            viewDiagnosisModal = new bootstrap.Modal(document.getElementById('viewDiagnosisModal'));
+        }
+        document.getElementById('diagnosisModalBody').innerHTML = '<div class="text-center py-4"><div class="spinner-border text-success"></div></div>';
+        viewDiagnosisModal.show();
+
+        fetch('/admin/diagnoses/view/' + id)
+            .then(res => res.json())
+            .then(d => {
+                const date = new Date(d.created_at).toLocaleDateString('uz-UZ');
+                const drugs = d.dorilar ? d.dorilar.map(dr => dr.name).join(', ') : '-';
+
+                let html = `
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <h6 class="text-primary fw-bold mb-3">Bemor</h6>
+                        <p><strong>${d.patient.name}</strong> (${d.patient.patient_code})</p>
+                        <p class="text-muted">PNFL: ${d.patient.child_pnfl}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-primary fw-bold mb-3">Shifokor</h6>
+                        <p><strong>${d.doctor ? d.doctor.name : '-'}</strong></p>
+                        <p class="text-muted">Sana: ${date}</p>
+                    </div>
+                </div>
+                <hr>
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <small class="text-muted">Shikoyatlar</small>
+                            <p>${d.shikoyat}</p>
+                        </div>
+                        <div class="mb-3">
+                            <small class="text-muted">Tashxis</small>
+                            <p class="fw-bold">${d.tashxis}</p>
+                        </div>
+                        <div class="mb-3">
+                            <small class="text-muted">Vazn / Bo'y</small>
+                            <p>${d.ogirligi} kg / ${d.boyi} sm</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <small class="text-muted">Spirometriya</small>
+                            <p>${d.spirometriya || '-'}</p>
+                        </div>
+                        <div class="mb-3">
+                            <small class="text-muted">IRT</small>
+                            <p>${d.irt || '-'}</p>
+                        </div>
+                        <div class="mb-3">
+                            <small class="text-muted">Sweat test</small>
+                            <p>${d.sweat_test || '-'}</p>
+                        </div>
+                        <div class="mb-3">
+                            <small class="text-muted">Genetik test</small>
+                            <p>${d.genetik_test || '-'}</p>
+                        </div>
+                    </div>
+                </div>
+                <hr>
+                <div class="mb-3">
+                    <small class="text-muted">Davolash</small>
+                    <p>${d.davolash}</p>
+                </div>
+                <div class="mb-3">
+                    <small class="text-muted">Dorilar</small>
+                    <p>${drugs}</p>
+                </div>
+                ${d.izohlar ? `<div class="mb-3"><small class="text-muted">Izohlar</small><p>${d.izohlar}</p></div>` : ''}
+                `;
+
+                document.getElementById('diagnosisModalBody').innerHTML = html;
+            })
+            .catch(err => {
+                document.getElementById('diagnosisModalBody').innerHTML = '<div class="text-center text-danger py-4">Xatolik yuz berdi</div>';
+            });
+    }
+</script>

@@ -1,0 +1,59 @@
+<div class="sidebar">
+    <div class="sidebar-header">
+        <a href="/doctor" class="sidebar-brand">
+            <i class="bi bi-heart-pulse-fill"></i>
+            <span>Mukovatsidoz</span>
+        </a>
+    </div>
+
+    <div class="sidebar-user d-flex align-items-center">
+        <div class="user-avatar">
+            {{#if user.name}}{{substring user.name 0 1}}{{else}}D{{/if}}
+        </div>
+        <div class="user-info">
+            <div class="user-name">{{user.name}}</div>
+            <div class="user-role">Shifokor</div>
+        </div>
+    </div>
+
+    <nav class="sidebar-nav">
+        <div class="nav-section">
+            <div class="nav-section-title">Asosiy</div>
+            <a href="/doctor" class="nav-link-custom {{#eq activePage 'dashboard'}}active{{/eq}}">
+                <i class="bi bi-grid-1x2-fill"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="/doctor/my-patients" class="nav-link-custom {{#eq activePage 'my-patients'}}active{{/eq}}">
+                <i class="bi bi-people-fill"></i>
+                <span>Mening bemorlarim</span>
+            </a>
+        </div>
+
+        <div class="nav-section">
+            <div class="nav-section-title">Amallar</div>
+            <button class="nav-link-custom" data-bs-toggle="modal" data-bs-target="#addPatientModal">
+                <i class="bi bi-person-plus-fill"></i>
+                <span>Bemor qo'shish</span>
+            </button>
+            <button class="nav-link-custom" data-bs-toggle="modal" data-bs-target="#addDiagnosisModal">
+                <i class="bi bi-clipboard2-plus-fill"></i>
+                <span>Tashxis qo'shish</span>
+            </button>
+        </div>
+
+        <div class="nav-section">
+            <div class="nav-section-title">Sozlamalar</div>
+            <a href="/doctor/profile" class="nav-link-custom {{#eq activePage 'profile'}}active{{/eq}}">
+                <i class="bi bi-person-gear"></i>
+                <span>Profil</span>
+            </a>
+        </div>
+    </nav>
+
+    <div class="sidebar-footer">
+        <a href="/auth/logout" class="nav-link-custom text-danger">
+            <i class="bi bi-box-arrow-right"></i>
+            <span>Chiqish</span>
+        </a>
+    </div>
+</div>

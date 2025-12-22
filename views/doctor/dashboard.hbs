@@ -1,0 +1,486 @@
+{{> doctor-sidebar activePage="dashboard"}}
+
+<div class="main-content">
+    {{> alerts}}
+
+    <div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <h1 class="page-title">Shifokor paneli</h1>
+            <p class="page-subtitle">Xush kelibsiz, {{user.name}}</p>
+        </div>
+        <div class="d-flex align-items-center gap-3 flex-wrap">
+            <form action="/doctor" method="GET" class="search-box">
+                <i class="bi bi-search"></i>
+                <input type="text" name="q" class="form-control" placeholder="PNFL yoki kod orqali qidirish..."
+                    value="{{query}}">
+            </form>
+            <span class="badge bg-white text-dark px-3 py-2 shadow-sm">
+                <i class="bi bi-calendar3 me-2"></i><span id="currentDate"></span>
+            </span>
+        </div>
+    </div>
+
+    {{#if patient}}
+    <div class="data-card mb-4 animate-fade-in">
+        <div class="card-header bg-primary text-white" style="border-radius: 20px 20px 0 0;">
+            <h5 class="text-white m-0">
+                <i class="bi bi-person-fill me-2"></i>
+                {{patient.name}} <span class="badge bg-white text-primary ms-2">{{patient.patient_code}}</span>
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="icon-box bg-primary bg-opacity-10 text-primary me-3"
+                            style="width:40px;height:40px;font-size:18px;">
+                            <i class="bi bi-fingerprint"></i>
+                        </div>
+                        <div><small class="text-muted d-block">PNFL</small><strong>{{patient.child_pnfl}}</strong></div>
+                    </div>
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="icon-box bg-info bg-opacity-10 text-info me-3"
+                            style="width:40px;height:40px;font-size:18px;">
+                            <i class="bi bi-gender-ambiguous"></i>
+                        </div>
+                        <div><small class="text-muted d-block">Jinsi</small><strong>{{getSex patient.sex}}</strong>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <div class="icon-box bg-warning bg-opacity-10 text-warning me-3"
+                            style="width:40px;height:40px;font-size:18px;">
+                            <i class="bi bi-calendar-heart"></i>
+                        </div>
+                        <div><small class="text-muted d-block">Yoshi</small><strong>{{patient.age}} yosh</strong></div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="icon-box bg-success bg-opacity-10 text-success me-3"
+                            style="width:40px;height:40px;font-size:18px;">
+                            <i class="bi bi-geo-alt"></i>
+                        </div>
+                        <div><small class="text-muted d-block">Viloyat</small><strong>{{getRegionName
+                                patient.region}}</strong></div>
+                    </div>
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="icon-box bg-secondary bg-opacity-10 text-secondary me-3"
+                            style="width:40px;height:40px;font-size:18px;">
+                            <i class="bi bi-building"></i>
+                        </div>
+                        <div><small class="text-muted d-block">Tuman</small><strong>{{patient.district}}</strong></div>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <div class="icon-box bg-primary bg-opacity-10 text-primary me-3"
+                            style="width:40px;height:40px;font-size:18px;">
+                            <i class="bi bi-telephone"></i>
+                        </div>
+                        <div><small class="text-muted d-block">Telefon</small><strong>{{patient.phone_number}}</strong>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="icon-box bg-danger bg-opacity-10 text-danger me-3"
+                            style="width:40px;height:40px;font-size:18px;">
+                            <i class="bi bi-person-heart"></i>
+                        </div>
+                        <div><small class="text-muted d-block">Ona</small><strong>{{patient.mother_name}}</strong></div>
+                    </div>
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="icon-box bg-dark bg-opacity-10 text-dark me-3"
+                            style="width:40px;height:40px;font-size:18px;">
+                            <i class="bi bi-person"></i>
+                        </div>
+                        <div><small class="text-muted d-block">Ota</small><strong>{{patient.father_name}}</strong></div>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <div class="icon-box bg-warning bg-opacity-10 text-warning me-3"
+                            style="width:40px;height:40px;font-size:18px;">
+                            <i class="bi bi-heart"></i>
+                        </div>
+                        <div><small class="text-muted d-block">Nikoh bog'liqligi</small><strong>{{ternary
+                                patient.related_marriage "Ha" "Yo'q"}}</strong></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {{/if}}
+
+    {{#if diagnoses}}
+    <div class="data-card mb-4 animate-fade-in">
+        <div class="card-header bg-success text-white" style="border-radius: 20px 20px 0 0;">
+            <h5 class="text-white m-0"><i class="bi bi-clipboard2-pulse me-2"></i>Kasallik tarixi ({{length diagnoses}}
+                ta)</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table mb-0">
+                    <thead>
+                        <tr>
+                            <th>Sana</th>
+                            <th>Shifokor</th>
+                            <th>Tashxis</th>
+                            <th>Vazn/Bo'y</th>
+                            <th>Davolash</th>
+                            <th>Dorilar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#each diagnoses}}
+                        <tr>
+                            <td><span class="badge bg-light text-dark">{{formatDate this.created_at}}</span></td>
+                            <td><span class="text-primary fw-semibold">{{this.doctor.name}}</span></td>
+                            <td>{{this.tashxis}}</td>
+                            <td><strong>{{this.ogirligi}}</strong> kg / <strong>{{this.boyi}}</strong> sm</td>
+                            <td>{{this.davolash}}</td>
+                            <td>
+                                {{#each this.dorilar}}
+                                <span class="badge bg-info bg-opacity-75 me-1">{{this.name}}</span>
+                                {{/each}}
+                            </td>
+                        </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {{/if}}
+
+    <div class="row g-4 mb-5">
+        <div class="col-md-6 col-lg-3 animate-fade-in" style="animation-delay: 0.1s">
+            <div class="stat-card">
+                <div class="icon-box bg-primary bg-opacity-10 text-primary">
+                    <i class="bi bi-people-fill"></i>
+                </div>
+                <div class="stat-label">Jami Bemorlar</div>
+                <div class="stat-value">{{length patients}}</div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3 animate-fade-in" style="animation-delay: 0.2s">
+            <div class="stat-card">
+                <div class="icon-box bg-success bg-opacity-10 text-success">
+                    <i class="bi bi-person-check-fill"></i>
+                </div>
+                <div class="stat-label">Mening bemorlarim</div>
+                <div class="stat-value">{{myPatientsCount}}</div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3 animate-fade-in" style="animation-delay: 0.3s">
+            <div class="stat-card">
+                <div class="icon-box bg-warning bg-opacity-10 text-warning">
+                    <i class="bi bi-calendar-plus-fill"></i>
+                </div>
+                <div class="stat-label">Yangi (Bugun)</div>
+                <div class="stat-value">{{todayCount}}</div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3 animate-fade-in" style="animation-delay: 0.4s">
+            <div class="stat-card">
+                <div class="icon-box bg-info bg-opacity-10 text-info">
+                    <i class="bi bi-geo-alt-fill"></i>
+                </div>
+                <div class="stat-label">Viloyatlar</div>
+                <div class="stat-value">13</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-6 animate-fade-in" style="animation-delay: 0.5s">
+            <div class="chart-card" style="padding: 16px;">
+                <div class="chart-title" style="font-size: 14px; margin-bottom: 12px;"><i
+                        class="bi bi-bar-chart-fill"></i> Viloyatlar statistikasi</div>
+                <canvas id="regionChart" height="150"></canvas>
+            </div>
+        </div>
+        <div class="col-lg-3 animate-fade-in" style="animation-delay: 0.6s">
+            <div class="chart-card" style="padding: 16px;">
+                <div class="chart-title" style="font-size: 14px; margin-bottom: 12px;"><i
+                        class="bi bi-pie-chart-fill"></i> Jinsi bo'yicha</div>
+                <canvas id="sexChart" height="150"></canvas>
+            </div>
+        </div>
+        <div class="col-lg-3 animate-fade-in" style="animation-delay: 0.7s">
+            <div class="chart-card" style="padding: 16px;">
+                <div class="chart-title" style="font-size: 14px; margin-bottom: 12px;"><i
+                        class="bi bi-pie-chart-fill"></i> Nikoh bog'liqligi</div>
+                <canvas id="marriageChart" height="150"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bemor qo'shish Modal -->
+<div class="modal fade" id="addPatientModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white" style="border-radius: 24px 24px 0 0;">
+                <h5 class="modal-title fw-bold"><i class="bi bi-person-plus-fill me-2"></i>Yangi bemor qo'shish</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form method="POST" action="/doctor/patients/add">
+                    <div class="row g-4">
+                        <div class="col-lg-4">
+                            <h6 class="text-primary fw-bold mb-3 pb-2 border-bottom"><i
+                                    class="bi bi-person me-2"></i>Asosiy ma'lumotlar</h6>
+                            <div class="form-floating mb-3"><input class="form-control" name="name"
+                                    required><label>Bemor F.I.O *</label></div>
+                            <div class="form-floating mb-3"><input class="form-control" name="card_number"><label>Tibbiy
+                                    karta raqami</label></div>
+                            <div class="form-floating mb-3">
+                                <select class="form-select" name="sex" required>
+                                    <option value="">Tanlang</option>
+                                    <option value="male">Erkak</option>
+                                    <option value="female">Ayol</option>
+                                </select>
+                                <label>Jinsi *</label>
+                            </div>
+                            <div class="form-floating mb-3"><input class="form-control" type="date" name="birthday"
+                                    required><label>Tug'ilgan sana *</label></div>
+                            <div class="form-floating mb-3"><input class="form-control" type="number" name="age" min="0"
+                                    max="150" required><label>Yoshi *</label></div>
+                            <div class="form-floating"><input class="form-control" name="child_pnfl" maxlength="14"
+                                    pattern="\d{14}" title="PNFL 14 ta raqamdan iborat bo'lishi kerak"
+                                    required><label>PNFL (14 raqam) *</label></div>
+                        </div>
+                        <div class="col-lg-4">
+                            <h6 class="text-primary fw-bold mb-3 pb-2 border-bottom"><i
+                                    class="bi bi-people me-2"></i>Ota-ona</h6>
+                            <div class="form-floating mb-3"><input class="form-control" name="mother_name"
+                                    required><label>Ona F.I.O *</label></div>
+                            <div class="form-floating mb-3"><input class="form-control" name="mother_id_number"
+                                    required><label>Ona Passport/ID *</label></div>
+                            <div class="form-floating mb-3"><input class="form-control"
+                                    name="mother_work_place"><label>Ona ish joyi</label></div>
+                            <div class="form-floating mb-3"><input class="form-control" name="father_name"
+                                    required><label>Ota F.I.O *</label></div>
+                            <div class="form-floating mb-3"><input class="form-control" name="father_id_number"
+                                    required><label>Ota Passport/ID *</label></div>
+                            <div class="form-floating"><input class="form-control" name="father_work_place"><label>Ota
+                                    ish joyi</label></div>
+                        </div>
+                        <div class="col-lg-4">
+                            <h6 class="text-primary fw-bold mb-3 pb-2 border-bottom"><i
+                                    class="bi bi-geo-alt me-2"></i>Manzil</h6>
+                            <div class="form-floating mb-3">
+                                <select class="form-select" name="region" required>
+                                    <option value="">Viloyat</option>
+                                    <option value="andijon">Andijon</option>
+                                    <option value="buxoro">Buxoro</option>
+                                    <option value="fargona">Farg'ona</option>
+                                    <option value="jizzax">Jizzax</option>
+                                    <option value="xorazm">Xorazm</option>
+                                    <option value="namangan">Namangan</option>
+                                    <option value="navoiy">Navoiy</option>
+                                    <option value="qashqadaryo">Qashqadaryo</option>
+                                    <option value="samarqand">Samarqand</option>
+                                    <option value="sirdaryo">Sirdaryo</option>
+                                    <option value="surxondaryo">Surxondaryo</option>
+                                    <option value="toshkent_vil">Toshkent viloyati</option>
+                                    <option value="toshkent_sh">Toshkent shahri</option>
+                                </select>
+                                <label>Viloyat *</label>
+                            </div>
+                            <div class="form-floating mb-3"><input class="form-control" name="district"
+                                    required><label>Tuman *</label></div>
+                            <div class="form-floating mb-3"><textarea class="form-control" name="full_address"
+                                    style="height:80px" required></textarea><label>To'liq manzil *</label></div>
+                            <div class="form-floating mb-3"><input class="form-control" name="phone_number"
+                                    required><label>Telefon *</label></div>
+                            <div class="form-floating mb-3"><input class="form-control"
+                                    name="second_number"><label>Qo'shimcha tel</label></div>
+                            <div class="d-flex align-items-center p-3 rounded-3"
+                                style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border: 1px solid #fcd34d;">
+                                <div class="form-check form-switch mb-0">
+                                    <input class="form-check-input" type="checkbox" name="related_marriage"
+                                        id="marriage" style="width: 46px; height: 24px; cursor: pointer;">
+                                </div>
+                                <label class="fw-semibold ms-2 mb-0" for="marriage" style="cursor: pointer;">
+                                    <i class="bi bi-heart-fill text-danger me-1"></i>Qarindoshlar nikohimi?
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-3 border-top text-end">
+                        <button type="button" class="btn btn-light px-4 me-2" data-bs-dismiss="modal">Bekor
+                            qilish</button>
+                        <button type="submit" class="btn btn-primary px-5"><i
+                                class="bi bi-check-lg me-2"></i>Saqlash</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tashxis qo'shish Modal -->
+<div class="modal fade" id="addDiagnosisModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white" style="border-radius: 24px 24px 0 0;">
+                <h5 class="modal-title fw-bold"><i class="bi bi-clipboard2-plus-fill me-2"></i>Yangi tashxis
+                    qo'shish</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form method="POST" action="/doctor/diagnosis/add">
+                    <div class="row g-4">
+                        <div class="col-lg-4">
+                            <h6 class="text-success fw-bold mb-3 pb-2 border-bottom"><i
+                                    class="bi bi-person me-2"></i>Bemor</h6>
+                            <div class="form-floating mb-3"><input type="text" class="form-control" id="pnfl_input"
+                                    placeholder="PNFL"><label>PNFL orqali qidirish</label></div>
+                            <div class="form-floating mb-3">
+                                <select class="form-select" name="patient_id" id="patient_select" required>
+                                    <option value="">Bemorni tanlang...</option>
+                                    {{#each patients}}<option value="{{this._id}}" data-pnfl="{{this.child_pnfl}}">
+                                        {{this.name}} ({{this.child_pnfl}})
+                                    </option>{{/each}}
+                                </select>
+                                <label>Bemor *</label>
+                            </div>
+                            <div class="row g-2 mb-3">
+                                <div class="col-6">
+                                    <div class="form-floating"><input type="number" step="0.01" class="form-control"
+                                            name="ogirligi" required><label>Vazn (kg) *</label></div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="form-floating"><input type="number" class="form-control" name="boyi"
+                                            required><label>Bo'y (sm) *</label></div>
+                                </div>
+                            </div>
+                            <div class="form-floating"><textarea class="form-control" name="shikoyat"
+                                    style="height:100px" required></textarea><label>Shikoyatlar *</label></div>
+                        </div>
+                        <div class="col-lg-4">
+                            <h6 class="text-success fw-bold mb-3 pb-2 border-bottom"><i
+                                    class="bi bi-clipboard-data me-2"></i>Testlar</h6>
+                            <div class="form-floating mb-3"><input type="text" class="form-control"
+                                    name="spirometriya"><label>Spirometriya</label></div>
+                            <div class="form-floating mb-3"><input type="text" class="form-control"
+                                    name="irt"><label>IRT natijasi</label></div>
+                            <div class="form-floating mb-3"><input type="text" class="form-control"
+                                    name="sweat_test"><label>Sweat test</label></div>
+                            <div class="form-floating"><textarea class="form-control" name="genetik_test"
+                                    style="height:100px"></textarea><label>Genetik test</label></div>
+                        </div>
+                        <div class="col-lg-4">
+                            <h6 class="text-success fw-bold mb-3 pb-2 border-bottom"><i
+                                    class="bi bi-file-medical me-2"></i>Xulosa</h6>
+                            <div class="form-floating mb-3"><textarea class="form-control" name="tashxis"
+                                    style="height:80px" required></textarea><label>Tashxis *</label></div>
+                            <div class="form-floating mb-3"><textarea class="form-control" name="davolash"
+                                    style="height:80px" required></textarea><label>Davolash *</label></div>
+                            <div class="mb-3">
+                                <label class="form-label small text-muted">Dorilar</label>
+                                <select class="form-select" name="dorilar" multiple style="height:80px">
+                                    {{#each drugs}}<option value="{{this._id}}">{{this.name}}</option>{{/each}}
+                                </select>
+                                <small class="text-muted">Ctrl tugmasini bosib bir nechta tanlang</small>
+                            </div>
+                            <div class="form-floating"><input type="text" class="form-control"
+                                    name="izohlar"><label>Izohlar</label></div>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-3 border-top text-end">
+                        <button type="button" class="btn btn-light px-4 me-2" data-bs-dismiss="modal">Bekor
+                            qilish</button>
+                        <button type="submit" class="btn btn-success px-5"><i
+                                class="bi bi-check-lg me-2"></i>Saqlash</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('currentDate').innerText = new Date().toLocaleDateString('uz-UZ', { year: 'numeric', month: 'long', day: 'numeric' });
+
+    const regionStats = {{{ regionStats }}};
+    const sexStats = {{{ sexStats }}};
+    const marriageStats = {{{ marriageStats }}};
+
+    const regionNames = {
+        'andijon': 'Andijon', 'buxoro': 'Buxoro', 'fargona': "Farg'ona",
+        'jizzax': 'Jizzax', 'xorazm': 'Xorazm', 'namangan': 'Namangan',
+        'navoiy': 'Navoiy', 'qashqadaryo': 'Qashqadaryo', 'samarqand': 'Samarqand',
+        'sirdaryo': 'Sirdaryo', 'surxondaryo': 'Surxondaryo',
+        'toshkent_vil': 'Toshkent vil.', 'toshkent_sh': 'Toshkent sh.'
+    };
+
+    const regionLabels = Object.keys(regionStats).map(k => regionNames[k] || k);
+
+    Chart.defaults.font.family = "'Inter', sans-serif";
+    Chart.defaults.plugins.legend.position = 'bottom';
+
+    if (document.getElementById('regionChart')) {
+        new Chart(document.getElementById('regionChart'), {
+            type: 'bar',
+            data: {
+                labels: regionLabels,
+                datasets: [{
+                    label: 'Bemorlar',
+                    data: Object.values(regionStats),
+                    backgroundColor: '#4f46e5',
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                scales: {
+                    y: { beginAtZero: true, grid: { display: false } },
+                    x: { grid: { display: false } }
+                },
+                plugins: { legend: { display: false } }
+            }
+        });
+    }
+
+    if (document.getElementById('sexChart')) {
+        new Chart(document.getElementById('sexChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Erkak', 'Ayol'],
+                datasets: [{
+                    data: [sexStats.male || 0, sexStats.female || 0],
+                    backgroundColor: ['#4f46e5', '#ec4899'],
+                    borderWidth: 0
+                }]
+            }
+        });
+    }
+
+    if (document.getElementById('marriageChart')) {
+        new Chart(document.getElementById('marriageChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Ha', "Yo'q"],
+                datasets: [{
+                    data: [marriageStats.yes || 0, marriageStats.no || 0],
+                    backgroundColor: ['#f59e0b', '#e2e8f0'],
+                    borderWidth: 0
+                }]
+            }
+        });
+    }
+
+    document.getElementById('pnfl_input').addEventListener('input', function () {
+        let select = document.getElementById('patient_select');
+        for (let i = 0; i < select.options.length; i++) {
+            if (select.options[i].getAttribute('data-pnfl') === this.value) {
+                select.selectedIndex = i;
+                this.classList.add('is-valid');
+                this.classList.remove('is-invalid');
+                return;
+            }
+        }
+        this.classList.remove('is-valid');
+        if (this.value.length === 14) {
+            this.classList.add('is-invalid');
+        }
+    });
+</script>

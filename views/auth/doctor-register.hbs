@@ -1,0 +1,37 @@
+{{#if errors}}
+{{#each errors}}
+<div class="alert alert-danger">{{this.msg}}</div>
+{{/each}}
+{{/if}}
+
+<form action="/auth/doctor/register" method="POST">
+    <div class="form-group">
+        <label>F.I.O</label>
+        <input type="text" name="name" placeholder="To'liq ismingiz" value="{{name}}" required>
+    </div>
+    <div class="form-group">
+        <label>Telefon raqam</label>
+        <input type="text" name="phone" placeholder="+998 90 123 45 67" value="{{phone}}" required>
+    </div>
+    <div class="form-group">
+        <label>Ish joyi</label>
+        <input type="text" name="address" placeholder="Klinika nomi" value="{{address}}" required>
+    </div>
+    <div class="form-group">
+        <label>Parol</label>
+        <input type="password" name="password" placeholder="Kamida 6 ta belgi" required>
+    </div>
+    <div class="form-group">
+        <label>Parolni tasdiqlang</label>
+        <input type="password" name="password2" placeholder="Parolni qayta kiriting" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Ro'yxatdan o'tish</button>
+</form>
+
+<div class="auth-footer">
+    Hisobingiz bormi? <a href="/auth/doctor/login">Kirish</a>
+</div>
+
+<div class="info-text">
+    Ro'yxatdan o'tgandan so'ng admin tasdiqlashini kutishingiz kerak.
+</div>

@@ -1,0 +1,28 @@
+{{#if success_msg}}
+<div class="alert alert-success">{{success_msg}}</div>
+{{/if}}
+{{#if error_msg}}
+<div class="alert alert-danger">{{error_msg}}</div>
+{{/if}}
+{{#if error}}
+<div class="alert alert-danger">{{error}}</div>
+{{/if}}
+
+<div style="text-align: center; margin-bottom: 20px;">
+    <span
+        style="background: rgba(239, 68, 68, 0.2); color: #ef4444; padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 600;">Admin
+        Panel</span>
+</div>
+
+<form action="/auth/admin/login" method="POST">
+    <div class="form-group">
+        <label>Login</label>
+        <input type="text" name="phone" placeholder="Admin login" required>
+    </div>
+    <div class="form-group">
+        <label>Parol</label>
+        <input type="password" name="password" placeholder="Parolingiz" required>
+    </div>
+    <button type="submit" class="btn btn-primary"
+        style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">Kirish</button>
+</form>
