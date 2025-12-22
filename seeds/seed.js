@@ -35,7 +35,8 @@ const seedDB = async () => {
     // Eski adminni o'chirish va yangisini yaratish
     await User.deleteOne({ phone: 'admin' });
     
-    const newAdmin = new User({
+    // Admin yaratish - role aniq belgilangan
+    const adminData = {
       name: 'Admin',
       phone: 'admin',
       password: 'admin123',
@@ -43,12 +44,17 @@ const seedDB = async () => {
       role: 'admin',
       is_approved: true,
       can_export: true
-    });
+    };
     
+    const newAdmin = new User(adminData);
     await newAdmin.save();
+    
+    // Tekshirish
+    const savedAdmin = await User.findOne({ phone: 'admin' });
     console.log('Admin yaratildi:');
     console.log('  Login: admin');
     console.log('  Parol: admin123');
+    console.log('  Role:', savedAdmin.role);
 
     // Test shifokor yaratish
     await User.deleteOne({ phone: '998901234567' });

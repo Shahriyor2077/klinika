@@ -13,6 +13,9 @@ require('dotenv').config();
 
 const app = express();
 
+// Trust proxy (Render, Heroku uchun)
+app.set('trust proxy', 1);
+
 // Passport config
 require('./config/passport')(passport);
 
