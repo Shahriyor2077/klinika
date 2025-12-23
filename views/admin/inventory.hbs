@@ -26,34 +26,10 @@
                 <div class="card-body">
                     <form action="/admin/inventory/add" method="POST">
                         <input type="hidden" name="type" value="{{type}}">
-                        {{#eq type 'drug'}}
-                        <div class="mb-3">
-                            <label class="form-label">Dori</label>
-                            <select name="drug" id="drugSelect" class="form-select" required>
-                                <option value="">Tanlang...</option>
-                                {{#each drugs}}
-                                <option value="{{this._id}}" data-minage="{{this.minAge}}"
-                                    data-maxage="{{this.maxAge}}">{{this.name}} ({{this.minAge}}-{{this.maxAge}} yosh)
-                                </option>
-                                {{/each}}
-                            </select>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-6">
-                                <label class="form-label">Min yosh</label>
-                                <input type="number" name="minAge" id="drugMinAge" class="form-control" value="0"
-                                    min="0" max="100">
-                            </div>
-                            <div class="col-6">
-                                <label class="form-label">Max yosh</label>
-                                <input type="number" name="maxAge" id="drugMaxAge" class="form-control" value="100"
-                                    min="0" max="100">
-                            </div>
-                        </div>
-                        {{else}}
                         <div class="mb-3">
                             <label class="form-label">Nomi</label>
-                            <input type="text" name="name" class="form-control" placeholder="Masalan: Kasha" required>
+                            <input type="text" name="name" class="form-control"
+                                placeholder="{{#eq type 'drug'}}Dori nomi{{else}}Oziq-ovqat nomi{{/eq}}">
                         </div>
                         <div class="row mb-3">
                             <div class="col-6">
@@ -65,11 +41,10 @@
                                 <input type="number" name="maxAge" class="form-control" value="100" min="0" max="100">
                             </div>
                         </div>
-                        {{/eq}}
                         <div class="row mb-3">
                             <div class="col-6">
                                 <label class="form-label">Miqdori</label>
-                                <input type="number" name="quantity" class="form-control" min="1" required>
+                                <input type="number" name="quantity" class="form-control" min="0">
                             </div>
                             <div class="col-6">
                                 <label class="form-label">Birlik</label>
@@ -78,7 +53,7 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Yaroqlilik muddati</label>
-                            <input type="date" name="expiryDate" class="form-control" required>
+                            <input type="date" name="expiryDate" class="form-control">
                         </div>
                         <button type="submit"
                             class="btn {{#eq type 'food'}}btn-success{{else}}btn-primary{{/eq}} w-100">
@@ -212,17 +187,5 @@
                 editModal.show();
             });
         });
-
-        // Dori tanlanganda yosh chegarasini avtomatik to'ldirish
-        var drugSelect = document.getElementById('drugSelect');
-        if (drugSelect) {
-            drugSelect.addEventListener('change', function () {
-                var selected = this.options[this.selectedIndex];
-                var minAge = selected.dataset.minage || 0;
-                var maxAge = selected.dataset.maxage || 100;
-                document.getElementById('drugMinAge').value = minAge;
-                document.getElementById('drugMaxAge').value = maxAge;
-            });
-        }
     });
 </script>

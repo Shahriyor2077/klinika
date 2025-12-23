@@ -477,25 +477,15 @@ router.get('/inventory', ensureAuthenticated, ensureAdmin, async (req, res) => {
 
 router.post('/inventory/add', ensureAuthenticated, ensureAdmin, async (req, res) => {
   try {
-    const { type, drug, name, quantity, unit, expiryDate, minAge, maxAge } = req.body;
-    let itemName = name;
-    let itemMinAge = parseInt(minAge) || 0;
-    let itemMaxAge = parseInt(maxAge) || 100;
-    if (type === 'drug' && drug) {
-      const drugDoc = await Drug.findById(drug);
-      if (drugDoc) {
-        itemName = drugDoc.name;
-        // Agar formadan yosh chegarasi kelgan bo'lsa, uni ishlatamiz, aks holda dori ma'lumotlaridan olamiz
-        if (!minAge && !maxAge) {
-          itemMinAge = drugDoc.minAge;
-          itemMaxAge = drugDoc.maxAge;
-        }
-      }
-    }
+    const { type, name, quantity, unit, expiryDate, minAge, maxAge } = req.body;
+    const itemName = sanitize(name) || 'Nomsiz';
+    const itemMinAge = parseInt(minAge) || 0;
+    const itemMaxAge = parseInt(maxAge) || 100;
     await Inventory.create({
-      type, name: sanitize(itemName), drug: type === 'drug' ? drug : null,
-      quantity: parseInt(quantity), unit: sanitize(unit) || 'dona',
-      expiryDate: new Date(expiryDate), minAge: itemMinAge, maxAge: itemMaxAge, addedBy: req.user._id
+      type, name: itemName, drug: null,
+      quantity: parseInt(quantity) || 0, unit: sanitize(unit) || 'dona',
+      expiryDate: expiryDate ? new Date(expiryDate) : new Date(), 
+      minAge: itemMinAge, maxAge: itemMaxAge, addedBy: req.user._id
     });
     req.flash('success_msg', 'Omborga qo\'shildi');
     res.redirect('/admin/inventory?type=' + type);
