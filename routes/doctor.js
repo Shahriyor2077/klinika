@@ -4,6 +4,9 @@ const Patient = require('../models/Patient');
 const Diagnosis = require('../models/Diagnosis');
 const Drug = require('../models/Drug');
 const User = require('../models/User');
+const Inventory = require('../models/Inventory');
+const Distribution = require('../models/Distribution');
+const ExcelJS = require('exceljs');
 const { ensureAuthenticated, ensureDoctor } = require('../middleware/auth');
 const { patientValidator, diagnosisValidator, sanitize } = require('../middleware/validator');
 
@@ -293,6 +296,228 @@ router.get('/drugs-by-age/:patientId', ensureAuthenticated, ensureDoctor, async 
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Xatolik' });
+  }
+});
+
+// Excel export - faqat ruxsat berilgan shifokorlar uchun
+router.get('/export', ensureAuthenticated, ensureDoctor, async (req, res) => {
+  try {
+    // Ruxsat tekshirish
+    if (!req.user.can_export) {
+      req.flash('error_msg', 'Sizga Excel eksport qilish ruxsati berilmagan. Admin bilan bog\'laning.');
+      return res.redirect('/doctor');
+    }
+
+    const workbook = new ExcelJS.Workbook();
+    workbook.creator = req.user.name;
+    workbook.created = new Date();
+
+    const regionNames = {
+      'andijon': 'Andijon', 'buxoro': 'Buxoro', 'fargona': "Farg'ona",
+      'jizzax': 'Jizzax', 'xorazm': 'Xorazm', 'namangan': 'Namangan',
+      'navoiy': 'Navoiy', 'qashqadaryo': 'Qashqadaryo', 'samarqand': 'Samarqand',
+      'sirdaryo': 'Sirdaryo', 'surxondaryo': 'Surxondaryo',
+      'toshkent_vil': 'Toshkent vil.', 'toshkent_sh': 'Toshkent sh.'
+    };
+
+    // 1. BEMORLAR SHEET
+    const patientsSheet = workbook.addWorksheet('Bemorlar');
+    patientsSheet.columns = [
+      { header: 'Kod', key: 'patient_code', width: 10 },
+      { header: 'F.I.O', key: 'name', width: 25 },
+      { header: 'PNFL', key: 'child_pnfl', width: 16 },
+      { header: 'Jinsi', key: 'sex', width: 10 },
+      { header: 'Yoshi', key: 'age', width: 8 },
+      { header: 'Tug\'ilgan sana', key: 'birthday', width: 14 },
+      { header: 'Viloyat', key: 'region', width: 15 },
+      { header: 'Tuman', key: 'district', width: 15 },
+      { header: 'Manzil', key: 'full_address', width: 30 },
+      { header: 'Telefon', key: 'phone_number', width: 15 },
+      { header: 'Qo\'shimcha tel', key: 'second_number', width: 15 },
+      { header: 'Ona F.I.O', key: 'mother_name', width: 25 },
+      { header: 'Ona ID', key: 'mother_id_number', width: 15 },
+      { header: 'Ota F.I.O', key: 'father_name', width: 25 },
+      { header: 'Ota ID', key: 'father_id_number', width: 15 },
+      { header: 'Qarindosh nikoh', key: 'related_marriage', width: 15 },
+      { header: 'Qo\'shilgan sana', key: 'patient_add_date', width: 14 }
+    ];
+    const patients = await Patient.find().sort({ patient_add_date: -1 }).lean();
+    patients.forEach(p => {
+      patientsSheet.addRow({
+        ...p,
+        sex: p.sex === 'male' ? 'Erkak' : 'Ayol',
+        region: regionNames[p.region] || p.region,
+        related_marriage: p.related_marriage ? 'Ha' : 'Yo\'q',
+        birthday: p.birthday ? new Date(p.birthday).toLocaleDateString('uz-UZ') : '',
+        patient_add_date: p.patient_add_date ? new Date(p.patient_add_date).toLocaleDateString('uz-UZ') : ''
+      });
+    });
+    patientsSheet.getRow(1).font = { bold: true };
+    patientsSheet.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: '4F46E5' } };
+    patientsSheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFF' } };
+
+    // 2. TASHXISLAR SHEET
+    const diagnosesSheet = workbook.addWorksheet('Tashxislar');
+    diagnosesSheet.columns = [
+      { header: 'Sana', key: 'created_at', width: 14 },
+      { header: 'Bemor', key: 'patient_name', width: 25 },
+      { header: 'Bemor PNFL', key: 'patient_pnfl', width: 16 },
+      { header: 'Shifokor', key: 'doctor_name', width: 20 },
+      { header: 'Shikoyat', key: 'shikoyat', width: 30 },
+      { header: 'Tashxis', key: 'tashxis', width: 30 },
+      { header: 'Vazn (kg)', key: 'ogirligi', width: 10 },
+      { header: 'Bo\'y (sm)', key: 'boyi', width: 10 },
+      { header: 'Spirometriya', key: 'spirometriya', width: 15 },
+      { header: 'IRT', key: 'irt', width: 15 },
+      { header: 'Sweat test', key: 'sweat_test', width: 15 },
+      { header: 'Genetik test', key: 'genetik_test', width: 20 },
+      { header: 'Davolash', key: 'davolash', width: 30 },
+      { header: 'Dorilar', key: 'dorilar', width: 30 },
+      { header: 'Izohlar', key: 'izohlar', width: 25 }
+    ];
+    const diagnoses = await Diagnosis.find()
+      .populate('patient', 'name child_pnfl')
+      .populate('doctor', 'name')
+      .populate('dorilar', 'name')
+      .sort({ created_at: -1 }).lean();
+    diagnoses.forEach(d => {
+      diagnosesSheet.addRow({
+        created_at: d.created_at ? new Date(d.created_at).toLocaleDateString('uz-UZ') : '',
+        patient_name: d.patient?.name || '',
+        patient_pnfl: d.patient?.child_pnfl || '',
+        doctor_name: d.doctor?.name || '',
+        shikoyat: d.shikoyat,
+        tashxis: d.tashxis,
+        ogirligi: d.ogirligi,
+        boyi: d.boyi,
+        spirometriya: d.spirometriya,
+        irt: d.irt,
+        sweat_test: d.sweat_test,
+        genetik_test: d.genetik_test,
+        davolash: d.davolash,
+        dorilar: d.dorilar?.map(dr => dr.name).join(', ') || '',
+        izohlar: d.izohlar
+      });
+    });
+    diagnosesSheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFF' } };
+    diagnosesSheet.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: '10B981' } };
+
+    // 3. OMBOR SHEET
+    const inventorySheet = workbook.addWorksheet('Ombor');
+    inventorySheet.columns = [
+      { header: 'Turi', key: 'type', width: 12 },
+      { header: 'Nomi', key: 'name', width: 25 },
+      { header: 'Miqdori', key: 'quantity', width: 10 },
+      { header: 'Birlik', key: 'unit', width: 10 },
+      { header: 'Min yosh', key: 'minAge', width: 10 },
+      { header: 'Max yosh', key: 'maxAge', width: 10 },
+      { header: 'Yaroqlilik', key: 'expiryDate', width: 14 },
+      { header: 'Qo\'shilgan', key: 'created_at', width: 14 }
+    ];
+    const inventory = await Inventory.find().sort({ name: 1 }).lean();
+    inventory.forEach(i => {
+      inventorySheet.addRow({
+        type: i.type === 'drug' ? 'Dori' : 'Oziq-ovqat',
+        name: i.name,
+        quantity: i.quantity,
+        unit: i.unit,
+        minAge: i.minAge,
+        maxAge: i.maxAge,
+        expiryDate: i.expiryDate ? new Date(i.expiryDate).toLocaleDateString('uz-UZ') : '',
+        created_at: i.created_at ? new Date(i.created_at).toLocaleDateString('uz-UZ') : ''
+      });
+    });
+    inventorySheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFF' } };
+    inventorySheet.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'F59E0B' } };
+
+    // 4. TARQATILGAN DORILAR SHEET
+    const distributionSheet = workbook.addWorksheet('Tarqatilgan dorilar');
+    distributionSheet.columns = [
+      { header: 'Sana', key: 'created_at', width: 14 },
+      { header: 'Bemor', key: 'patient_name', width: 25 },
+      { header: 'Turi', key: 'type', width: 12 },
+      { header: 'Mahsulotlar', key: 'items', width: 40 },
+      { header: 'Izoh', key: 'comment', width: 25 },
+      { header: 'Bergan', key: 'givenBy', width: 20 }
+    ];
+    const distributions = await Distribution.find()
+      .populate('patient', 'name')
+      .populate('givenBy', 'name')
+      .sort({ created_at: -1 }).lean();
+    distributions.forEach(d => {
+      distributionSheet.addRow({
+        created_at: d.created_at ? new Date(d.created_at).toLocaleDateString('uz-UZ') : '',
+        patient_name: d.patient?.name || '',
+        type: d.type === 'drug' ? 'Dori' : 'Oziq-ovqat',
+        items: d.items?.map(i => `${i.name} (${i.quantity} ${i.unit})`).join(', ') || '',
+        comment: d.comment,
+        givenBy: d.givenBy?.name || ''
+      });
+    });
+    distributionSheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFF' } };
+    distributionSheet.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'EC4899' } };
+
+    // 5. SHIFOKORLAR SHEET
+    const usersSheet = workbook.addWorksheet('Shifokorlar');
+    usersSheet.columns = [
+      { header: 'F.I.O', key: 'name', width: 25 },
+      { header: 'Telefon', key: 'phone', width: 15 },
+      { header: 'Manzil', key: 'address', width: 30 },
+      { header: 'Rol', key: 'role', width: 12 },
+      { header: 'Tasdiqlangan', key: 'is_approved', width: 12 },
+      { header: 'Excel ruxsati', key: 'can_export', width: 12 },
+      { header: 'Ro\'yxatdan o\'tgan', key: 'created_at', width: 14 }
+    ];
+    const users = await User.find({ role: 'doctor' }).sort({ created_at: -1 }).lean();
+    users.forEach(u => {
+      usersSheet.addRow({
+        name: u.name,
+        phone: u.phone,
+        address: u.address,
+        role: u.role === 'admin' ? 'Admin' : 'Shifokor',
+        is_approved: u.is_approved ? 'Ha' : 'Yo\'q',
+        can_export: u.can_export ? 'Ha' : 'Yo\'q',
+        created_at: u.created_at ? new Date(u.created_at).toLocaleDateString('uz-UZ') : ''
+      });
+    });
+    usersSheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFF' } };
+    usersSheet.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: '6366F1' } };
+
+    // 6. DORILAR KATALOGI SHEET
+    const drugsSheet = workbook.addWorksheet('Dorilar katalogi');
+    drugsSheet.columns = [
+      { header: 'Nomi', key: 'name', width: 25 },
+      { header: 'Min yosh', key: 'minAge', width: 10 },
+      { header: 'Max yosh', key: 'maxAge', width: 10 },
+      { header: 'Miqdori', key: 'quantity', width: 10 },
+      { header: 'Narxi', key: 'price', width: 12 },
+      { header: 'Yaroqlilik', key: 'expiryDate', width: 14 },
+      { header: 'Tavsif', key: 'description', width: 30 }
+    ];
+    const drugs = await Drug.find().sort({ name: 1 }).lean();
+    drugs.forEach(d => {
+      drugsSheet.addRow({
+        name: d.name,
+        minAge: d.minAge,
+        maxAge: d.maxAge,
+        quantity: d.quantity,
+        price: d.price,
+        expiryDate: d.expiryDate ? new Date(d.expiryDate).toLocaleDateString('uz-UZ') : '',
+        description: d.description
+      });
+    });
+    drugsSheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFF' } };
+    drugsSheet.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: '14B8A6' } };
+
+    // Excel faylni yuborish
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename=mukovatsidoz_hisobot_${Date.now()}.xlsx`);
+    await workbook.xlsx.write(res);
+    res.end();
+  } catch (err) {
+    console.error(err);
+    req.flash('error_msg', 'Excel yaratishda xatolik');
+    res.redirect('/doctor');
   }
 });
 
