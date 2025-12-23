@@ -5,18 +5,29 @@ module.exports = {
     return String(str).substring(start, end);
   },
 
-  // Tenglikni tekshirish
-  eq: function(a, b) {
+  // Tenglikni tekshirish (block helper)
+  eq: function(a, b, options) {
+    if (arguments.length === 3) {
+      // Block helper sifatida ishlatilgan
+      return a === b ? options.fn(this) : options.inverse(this);
+    }
+    // Oddiy helper sifatida
     return a === b;
   },
 
   // Katta tekshirish
-  gt: function(a, b) {
+  gt: function(a, b, options) {
+    if (arguments.length === 3 && options && options.fn) {
+      return a > b ? options.fn(this) : options.inverse(this);
+    }
     return a > b;
   },
 
   // Kichik tekshirish
-  lt: function(a, b) {
+  lt: function(a, b, options) {
+    if (arguments.length === 3 && options && options.fn) {
+      return a < b ? options.fn(this) : options.inverse(this);
+    }
     return a < b;
   },
   

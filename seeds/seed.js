@@ -4,20 +4,22 @@ const User = require('../models/User');
 require('dotenv').config();
 
 const drugs = [
-  'Pulmozyme (Dornase alfa)',
-  'Creon (Pancrelipase)',
-  'Kalydeco (Ivacaftor)',
-  'Orkambi (Lumacaftor/Ivacaftor)',
-  'Symdeko (Tezacaftor/Ivacaftor)',
-  'Trikafta (Elexacaftor/Tezacaftor/Ivacaftor)',
-  'Azithromycin',
-  'Tobramycin',
-  'Colistin',
-  'Vitamin A',
-  'Vitamin D',
-  'Vitamin E',
-  'Vitamin K',
-  'Ursodeoxycholic acid'
+  { name: 'Pulmozyme (Dornase alfa)', minAge: 5, maxAge: 100, description: '' },
+  { name: 'Creon (Pancrelipase)', minAge: 0, maxAge: 100, description: '' },
+  { name: 'Kalydeco (Ivacaftor)', minAge: 6, maxAge: 100, description: '' },
+  { name: 'Orkambi (Lumacaftor/Ivacaftor)', minAge: 2, maxAge: 100, description: '' },
+  { name: 'Symdeko (Tezacaftor/Ivacaftor)', minAge: 6, maxAge: 100, description: '' },
+  { name: 'Trikafta (Elexacaftor/Tezacaftor/Ivacaftor)', minAge: 12, maxAge: 100, description: '' },
+  { name: 'Azithromycin', minAge: 6, maxAge: 100, description: '' },
+  { name: 'Tobramycin', minAge: 6, maxAge: 100, description: '' },
+  { name: 'Colistin', minAge: 2, maxAge: 100, description: '' },
+  { name: 'Vitamin A', minAge: 0, maxAge: 100, description: '' },
+  { name: 'Vitamin D', minAge: 0, maxAge: 100, description: '' },
+  { name: 'Vitamin E', minAge: 0, maxAge: 100, description: '' },
+  { name: 'Vitamin K', minAge: 0, maxAge: 100, description: '' },
+  { name: 'Ursodeoxycholic acid', minAge: 1, maxAge: 100, description: '' },
+  { name: 'Paracetamol', minAge: 1, maxAge: 5, description: 'Yarimta istemol qilinadi' },
+  { name: 'Trimol', minAge: 12, maxAge: 100, description: '12 yoshdan yuqorisiga' }
 ];
 
 const seedDB = async () => {
@@ -27,10 +29,10 @@ const seedDB = async () => {
 
     // Dorilarni qo'shish
     await Drug.deleteMany({});
-    for (const name of drugs) {
-      await Drug.create({ name });
+    for (const drug of drugs) {
+      await Drug.create(drug);
     }
-    console.log('Dorilar qo\'shildi');
+    console.log('Dorilar qo\'shildi (yosh chegarasi bilan)');
 
     // Eski adminni o'chirish va yangisini yaratish
     await User.deleteOne({ phone: 'admin' });

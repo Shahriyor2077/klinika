@@ -274,4 +274,26 @@ router.post('/diagnosis/add', ensureAuthenticated, ensureDoctor, async (req, res
   }
 });
 
+// Bemor yoshiga qarab dorilarni olish (AJAX)
+router.get('/drugs-by-age/:patientId', ensureAuthenticated, ensureDoctor, async (req, res) => {
+  try {
+    const patient = await Patient.findById(req.params.patientId);
+    if (!patient) {
+      return res.status(404).json({ error: 'Bemor topilmadi' });
+    }
+    
+    // Bemor yoshiga mos dorilar
+    const drugs = await Drug.find({
+      minAge: { $lte: patient.age },
+      maxAge: { $gte: patient.age },
+      quantity: { $gt: 0 }
+    }).sort({ name: 1 }).lean();
+    
+    res.json({ drugs, patientAge: patient.age });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Xatolik' });
+  }
+});
+
 module.exports = router;

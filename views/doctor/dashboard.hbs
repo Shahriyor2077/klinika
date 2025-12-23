@@ -193,21 +193,27 @@
             <div class="chart-card" style="padding: 16px;">
                 <div class="chart-title" style="font-size: 14px; margin-bottom: 12px;"><i
                         class="bi bi-bar-chart-fill"></i> Viloyatlar statistikasi</div>
-                <canvas id="regionChart" height="150"></canvas>
+                <div style="height: 200px; position: relative;">
+                    <canvas id="regionChart"></canvas>
+                </div>
             </div>
         </div>
         <div class="col-lg-3 animate-fade-in" style="animation-delay: 0.6s">
             <div class="chart-card" style="padding: 16px;">
                 <div class="chart-title" style="font-size: 14px; margin-bottom: 12px;"><i
                         class="bi bi-pie-chart-fill"></i> Jinsi bo'yicha</div>
-                <canvas id="sexChart" height="150"></canvas>
+                <div style="height: 200px; position: relative;">
+                    <canvas id="sexChart"></canvas>
+                </div>
             </div>
         </div>
         <div class="col-lg-3 animate-fade-in" style="animation-delay: 0.7s">
             <div class="chart-card" style="padding: 16px;">
                 <div class="chart-title" style="font-size: 14px; margin-bottom: 12px;"><i
                         class="bi bi-pie-chart-fill"></i> Nikoh bog'liqligi</div>
-                <canvas id="marriageChart" height="150"></canvas>
+                <div style="height: 200px; position: relative;">
+                    <canvas id="marriageChart"></canvas>
+                </div>
             </div>
         </div>
     </div>
@@ -337,11 +343,16 @@
                             <div class="form-floating mb-3">
                                 <select class="form-select" name="patient_id" id="patient_select" required>
                                     <option value="">Bemorni tanlang...</option>
-                                    {{#each patients}}<option value="{{this._id}}" data-pnfl="{{this.child_pnfl}}">
-                                        {{this.name}} ({{this.child_pnfl}})
+                                    {{#each patients}}<option value="{{this._id}}" data-pnfl="{{this.child_pnfl}}"
+                                        data-age="{{this.age}}">
+                                        {{this.name}} ({{this.child_pnfl}}) - {{this.age}} yosh
                                     </option>{{/each}}
                                 </select>
                                 <label>Bemor *</label>
+                            </div>
+                            <div id="patientAgeInfo" class="alert alert-info py-2 mb-3" style="display:none;">
+                                <small><i class="bi bi-info-circle me-1"></i>Bemor yoshi: <strong
+                                        id="selectedAge"></strong> yosh. Dorilar shu yoshga mos filtrlanadi.</small>
                             </div>
                             <div class="row g-2 mb-3">
                                 <div class="col-6">
@@ -376,11 +387,14 @@
                             <div class="form-floating mb-3"><textarea class="form-control" name="davolash"
                                     style="height:80px" required></textarea><label>Davolash *</label></div>
                             <div class="mb-3">
-                                <label class="form-label small text-muted">Dorilar</label>
-                                <select class="form-select" name="dorilar" multiple style="height:80px">
-                                    {{#each drugs}}<option value="{{this._id}}">{{this.name}}</option>{{/each}}
+                                <label class="form-label small text-muted">Dorilar <span id="drugsCount"></span></label>
+                                <select class="form-select" name="dorilar" id="dorilar_select" multiple
+                                    style="height:80px">
+                                    {{#each drugs}}<option value="{{this._id}}" data-minage="{{this.minAge}}"
+                                        data-maxage="{{this.maxAge}}">{{this.name}} ({{this.minAge}}-{{this.maxAge}}
+                                        yosh)</option>{{/each}}
                                 </select>
-                                <small class="text-muted">Ctrl tugmasini bosib bir nechta tanlang</small>
+                                <small class="text-muted">Bemor tanlanganda yoshga mos dorilar ko'rinadi</small>
                             </div>
                             <div class="form-floating"><input type="text" class="form-control"
                                     name="izohlar"><label>Izohlar</label></div>
@@ -399,88 +413,166 @@
 </div>
 
 <script>
-    document.getElementById('currentDate').innerText = new Date().toLocaleDateString('uz-UZ', { year: 'numeric', month: 'long', day: 'numeric' });
+    document.addEventListener('DOMContentLoaded', function () {
+        document.getElementById('currentDate').innerText = new Date().toLocaleDateString('uz-UZ', { year: 'numeric', month: 'long', day: 'numeric' });
 
-    const regionStats = {{{ regionStats }}};
-    const sexStats = {{{ sexStats }}};
-    const marriageStats = {{{ marriageStats }}};
+        var regionStats = JSON.parse('{{{regionStats}}}' || '{}');
+        var sexStats = JSON.parse('{{{sexStats}}}' || '{}');
+        var marriageStats = JSON.parse('{{{marriageStats}}}' || '{}');
 
-    const regionNames = {
-        'andijon': 'Andijon', 'buxoro': 'Buxoro', 'fargona': "Farg'ona",
-        'jizzax': 'Jizzax', 'xorazm': 'Xorazm', 'namangan': 'Namangan',
-        'navoiy': 'Navoiy', 'qashqadaryo': 'Qashqadaryo', 'samarqand': 'Samarqand',
-        'sirdaryo': 'Sirdaryo', 'surxondaryo': 'Surxondaryo',
-        'toshkent_vil': 'Toshkent vil.', 'toshkent_sh': 'Toshkent sh.'
-    };
+        console.log('Region stats:', regionStats);
+        console.log('Sex stats:', sexStats);
+        console.log('Marriage stats:', marriageStats);
+        console.log('Chart available:', typeof Chart !== 'undefined');
 
-    const regionLabels = Object.keys(regionStats).map(k => regionNames[k] || k);
+        var regionNames = {
+            'andijon': 'Andijon', 'buxoro': 'Buxoro', 'fargona': "Farg'ona",
+            'jizzax': 'Jizzax', 'xorazm': 'Xorazm', 'namangan': 'Namangan',
+            'navoiy': 'Navoiy', 'qashqadaryo': 'Qashqadaryo', 'samarqand': 'Samarqand',
+            'sirdaryo': 'Sirdaryo', 'surxondaryo': 'Surxondaryo',
+            'toshkent_vil': 'Toshkent vil.', 'toshkent_sh': 'Toshkent sh.'
+        };
 
-    Chart.defaults.font.family = "'Inter', sans-serif";
-    Chart.defaults.plugins.legend.position = 'bottom';
+        var regionLabels = Object.keys(regionStats).map(function (k) { return regionNames[k] || k; });
 
-    if (document.getElementById('regionChart')) {
-        new Chart(document.getElementById('regionChart'), {
-            type: 'bar',
-            data: {
-                labels: regionLabels,
-                datasets: [{
-                    label: 'Bemorlar',
-                    data: Object.values(regionStats),
-                    backgroundColor: '#4f46e5',
-                    borderRadius: 8
-                }]
-            },
-            options: {
-                scales: {
-                    y: { beginAtZero: true, grid: { display: false } },
-                    x: { grid: { display: false } }
-                },
-                plugins: { legend: { display: false } }
+        if (typeof Chart !== 'undefined') {
+            Chart.defaults.font.family = "'Inter', sans-serif";
+            Chart.defaults.plugins.legend.position = 'bottom';
+
+            // Region chart
+            const regionCtx = document.getElementById('regionChart');
+            if (regionCtx) {
+                new Chart(regionCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: regionLabels.length > 0 ? regionLabels : ['Ma\'lumot yo\'q'],
+                        datasets: [{
+                            label: 'Bemorlar',
+                            data: Object.values(regionStats).length > 0 ? Object.values(regionStats) : [0],
+                            backgroundColor: '#4f46e5',
+                            borderRadius: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { beginAtZero: true, grid: { display: false } },
+                            x: { grid: { display: false } }
+                        },
+                        plugins: { legend: { display: false } }
+                    }
+                });
             }
-        });
-    }
 
-    if (document.getElementById('sexChart')) {
-        new Chart(document.getElementById('sexChart'), {
-            type: 'doughnut',
-            data: {
-                labels: ['Erkak', 'Ayol'],
-                datasets: [{
-                    data: [sexStats.male || 0, sexStats.female || 0],
-                    backgroundColor: ['#4f46e5', '#ec4899'],
-                    borderWidth: 0
-                }]
+            // Sex chart
+            const sexCtx = document.getElementById('sexChart');
+            if (sexCtx) {
+                new Chart(sexCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Erkak', 'Ayol'],
+                        datasets: [{
+                            data: [sexStats.male || 0, sexStats.female || 0],
+                            backgroundColor: ['#4f46e5', '#ec4899'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
             }
-        });
-    }
 
-    if (document.getElementById('marriageChart')) {
-        new Chart(document.getElementById('marriageChart'), {
-            type: 'doughnut',
-            data: {
-                labels: ['Ha', "Yo'q"],
-                datasets: [{
-                    data: [marriageStats.yes || 0, marriageStats.no || 0],
-                    backgroundColor: ['#f59e0b', '#e2e8f0'],
-                    borderWidth: 0
-                }]
+            // Marriage chart
+            const marriageCtx = document.getElementById('marriageChart');
+            if (marriageCtx) {
+                new Chart(marriageCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Ha', "Yo'q"],
+                        datasets: [{
+                            data: [marriageStats.yes || 0, marriageStats.no || 0],
+                            backgroundColor: ['#f59e0b', '#e2e8f0'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
             }
-        });
-    }
-
-    document.getElementById('pnfl_input').addEventListener('input', function () {
-        let select = document.getElementById('patient_select');
-        for (let i = 0; i < select.options.length; i++) {
-            if (select.options[i].getAttribute('data-pnfl') === this.value) {
-                select.selectedIndex = i;
-                this.classList.add('is-valid');
-                this.classList.remove('is-invalid');
-                return;
-            }
+        } else {
+            console.error('Chart.js yuklanmagan!');
         }
-        this.classList.remove('is-valid');
-        if (this.value.length === 14) {
-            this.classList.add('is-invalid');
+
+        const pnflInput = document.getElementById('pnfl_input');
+        if (pnflInput) {
+            pnflInput.addEventListener('input', function () {
+                var select = document.getElementById('patient_select');
+                for (var i = 0; i < select.options.length; i++) {
+                    if (select.options[i].getAttribute('data-pnfl') === this.value) {
+                        select.selectedIndex = i;
+                        select.dispatchEvent(new Event('change'));
+                        this.classList.add('is-valid');
+                        this.classList.remove('is-invalid');
+                        return;
+                    }
+                }
+                this.classList.remove('is-valid');
+                if (this.value.length === 14) {
+                    this.classList.add('is-invalid');
+                }
+            });
+        }
+
+        // Bemor tanlanganda dorilarni filtrlash
+        var patientSelect = document.getElementById('patient_select');
+        var dorilarSelect = document.getElementById('dorilar_select');
+        var patientAgeInfo = document.getElementById('patientAgeInfo');
+        var selectedAgeSpan = document.getElementById('selectedAge');
+        var drugsCountSpan = document.getElementById('drugsCount');
+
+        if (patientSelect && dorilarSelect) {
+            patientSelect.addEventListener('change', function () {
+                var selectedOption = this.options[this.selectedIndex];
+                var patientAge = parseInt(selectedOption.getAttribute('data-age')) || 0;
+
+                if (this.value && patientAge > 0) {
+                    // Yosh ma'lumotini ko'rsatish
+                    selectedAgeSpan.textContent = patientAge;
+                    patientAgeInfo.style.display = 'block';
+
+                    // Dorilarni filtrlash
+                    var visibleCount = 0;
+                    for (var i = 0; i < dorilarSelect.options.length; i++) {
+                        var option = dorilarSelect.options[i];
+                        var minAge = parseInt(option.getAttribute('data-minage')) || 0;
+                        var maxAge = parseInt(option.getAttribute('data-maxage')) || 100;
+
+                        if (patientAge >= minAge && patientAge <= maxAge) {
+                            option.style.display = '';
+                            option.disabled = false;
+                            visibleCount++;
+                        } else {
+                            option.style.display = 'none';
+                            option.disabled = true;
+                            option.selected = false;
+                        }
+                    }
+                    drugsCountSpan.textContent = '(' + visibleCount + ' ta mos)';
+                } else {
+                    patientAgeInfo.style.display = 'none';
+                    drugsCountSpan.textContent = '';
+                    // Barcha dorilarni ko'rsatish
+                    for (var j = 0; j < dorilarSelect.options.length; j++) {
+                        dorilarSelect.options[j].style.display = '';
+                        dorilarSelect.options[j].disabled = false;
+                    }
+                }
+            });
         }
     });
 </script>
