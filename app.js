@@ -4,12 +4,14 @@ const mongoose = require('mongoose');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
 const flash = require('connect-flash');
-const passport = require('passport');
+// const passport = require('passport');
+const passport=require("./config/passport")
 const methodOverride = require('method-override');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
 require('dotenv').config();
+
 
 const app = express();
 
@@ -111,5 +113,5 @@ app.use((err, req, res, next) => {
   res.status(500).render('errors/500', { layout: 'auth' });
 });
 
-const PORT = process.env.PORT || 2000;
+const PORT = process.env.PORT;
 app.listen(PORT, () => console.log(`Server ${PORT} portda ishlamoqda`));
