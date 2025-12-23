@@ -295,7 +295,8 @@ router.post('/forgot-password', otpLimiter, async (req, res) => {
       type: 'reset'
     });
 
-    const message = `Parolni tiklash kodi: ${otpCode}`;
+    const template = process.env.SMS_TEMPLATE || 'Kod: {otp}';
+    const message = template.replace('{otp}', otpCode);
     const smsResult = await sendSms(phone, message);
 
     if (!smsResult.success) {
