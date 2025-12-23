@@ -4,8 +4,7 @@ const mongoose = require('mongoose');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
 const flash = require('connect-flash');
-// const passport = require('passport');
-const passport=require("./config/passport")
+const passport = require('passport');
 const methodOverride = require('method-override');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
@@ -113,5 +112,5 @@ app.use((err, req, res, next) => {
   res.status(500).render('errors/500', { layout: 'auth' });
 });
 
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server ${PORT} portda ishlamoqda`));
