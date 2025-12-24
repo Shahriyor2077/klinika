@@ -151,25 +151,31 @@
         viewPatientModal.show();
 
         fetch('/admin/patients/view/' + id)
-            .then(res => res.json())
+            .then(res => {
+                if (!res.ok) throw new Error('Server xatosi: ' + res.status);
+                return res.json();
+            })
             .then(data => {
+                if (data.error) {
+                    throw new Error(data.error);
+                }
                 const p = data.patient;
                 const d = data.diagnoses;
                 let html = `
                 <div class="row g-3">
                     <div class="col-md-6">
-                        <div class="mb-3"><small class="text-muted">Kod</small><div class="fw-bold">${p.patient_code}</div></div>
-                        <div class="mb-3"><small class="text-muted">PNFL</small><div class="fw-bold">${p.child_pnfl}</div></div>
+                        <div class="mb-3"><small class="text-muted">Kod</small><div class="fw-bold">${p.patient_code || '-'}</div></div>
+                        <div class="mb-3"><small class="text-muted">PNFL</small><div class="fw-bold">${p.child_pnfl || '-'}</div></div>
                         <div class="mb-3"><small class="text-muted">Jinsi</small><div>${p.sex === 'male' ? 'Erkak' : 'Ayol'}</div></div>
-                        <div class="mb-3"><small class="text-muted">Yoshi</small><div>${p.age} yosh</div></div>
-                        <div class="mb-3"><small class="text-muted">Viloyat</small><div>${regionNames[p.region] || p.region}</div></div>
-                        <div class="mb-3"><small class="text-muted">Tuman</small><div>${p.district}</div></div>
+                        <div class="mb-3"><small class="text-muted">Yoshi</small><div>${p.age || 0} yosh</div></div>
+                        <div class="mb-3"><small class="text-muted">Viloyat</small><div>${regionNames[p.region] || p.region || '-'}</div></div>
+                        <div class="mb-3"><small class="text-muted">Tuman</small><div>${p.district || '-'}</div></div>
                     </div>
                     <div class="col-md-6">
-                        <div class="mb-3"><small class="text-muted">Telefon</small><div class="fw-bold">${p.phone_number}</div></div>
-                        <div class="mb-3"><small class="text-muted">Ona</small><div>${p.mother_name}</div></div>
-                        <div class="mb-3"><small class="text-muted">Ota</small><div>${p.father_name}</div></div>
-                        <div class="mb-3"><small class="text-muted">Manzil</small><div>${p.full_address}</div></div>
+                        <div class="mb-3"><small class="text-muted">Telefon</small><div class="fw-bold">${p.phone_number || '-'}</div></div>
+                        <div class="mb-3"><small class="text-muted">Ona</small><div>${p.mother_name || '-'}</div></div>
+                        <div class="mb-3"><small class="text-muted">Ota</small><div>${p.father_name || '-'}</div></div>
+                        <div class="mb-3"><small class="text-muted">Manzil</small><div>${p.full_address || '-'}</div></div>
                         <div class="mb-3"><small class="text-muted">Qarindosh nikoh</small><div>${p.related_marriage ? 'Ha' : "Yo'q"}</div></div>
                     </div>
                 </div>`;
@@ -180,16 +186,17 @@
                     d.forEach(diag => {
                         const date = new Date(diag.created_at).toLocaleDateString('uz-UZ');
                         const doctorName = diag.doctor ? diag.doctor.name : '-';
-                        html += `<tr><td>${date}</td><td class="text-primary">${doctorName}</td><td>${diag.tashxis}</td><td>${diag.ogirligi} kg / ${diag.boyi} sm</td></tr>`;
+                        html += `<tr><td>${date}</td><td class="text-primary">${doctorName}</td><td>${diag.tashxis || '-'}</td><td>${diag.ogirligi || 0} kg / ${diag.boyi || 0} sm</td></tr>`;
                     });
                     html += '</tbody></table></div>';
                 }
 
-                document.getElementById('patientName').textContent = p.name;
+                document.getElementById('patientName').textContent = p.name || 'Bemor';
                 document.getElementById('patientModalBody').innerHTML = html;
             })
             .catch(err => {
-                document.getElementById('patientModalBody').innerHTML = '<div class="text-center text-danger py-4">Xatolik yuz berdi</div>';
+                console.error('viewPatient xatosi:', err);
+                document.getElementById('patientModalBody').innerHTML = '<div class="text-center text-danger py-4"><i class="bi bi-exclamation-triangle fs-1 d-block mb-2"></i>Xatolik yuz berdi: ' + err.message + '</div>';
             });
     }
 </script>

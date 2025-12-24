@@ -4,22 +4,22 @@ const User = require('../models/User');
 require('dotenv').config();
 
 const drugs = [
-  { name: 'Pulmozyme (Dornase alfa)', minAge: 5, maxAge: 100, description: '' },
-  { name: 'Creon (Pancrelipase)', minAge: 0, maxAge: 100, description: '' },
-  { name: 'Kalydeco (Ivacaftor)', minAge: 6, maxAge: 100, description: '' },
-  { name: 'Orkambi (Lumacaftor/Ivacaftor)', minAge: 2, maxAge: 100, description: '' },
-  { name: 'Symdeko (Tezacaftor/Ivacaftor)', minAge: 6, maxAge: 100, description: '' },
-  { name: 'Trikafta (Elexacaftor/Tezacaftor/Ivacaftor)', minAge: 12, maxAge: 100, description: '' },
-  { name: 'Azithromycin', minAge: 6, maxAge: 100, description: '' },
-  { name: 'Tobramycin', minAge: 6, maxAge: 100, description: '' },
-  { name: 'Colistin', minAge: 2, maxAge: 100, description: '' },
-  { name: 'Vitamin A', minAge: 0, maxAge: 100, description: '' },
-  { name: 'Vitamin D', minAge: 0, maxAge: 100, description: '' },
-  { name: 'Vitamin E', minAge: 0, maxAge: 100, description: '' },
-  { name: 'Vitamin K', minAge: 0, maxAge: 100, description: '' },
-  { name: 'Ursodeoxycholic acid', minAge: 1, maxAge: 100, description: '' },
-  { name: 'Paracetamol', minAge: 1, maxAge: 5, description: 'Yarimta istemol qilinadi' },
-  { name: 'Trimol', minAge: 12, maxAge: 100, description: '12 yoshdan yuqorisiga' }
+  { name: 'Pulmozyme (Dornase alfa)', minAge: 5, maxAge: 100, quantity: 100, description: '' },
+  { name: 'Creon (Pancrelipase)', minAge: 0, maxAge: 100, quantity: 200, description: '' },
+  { name: 'Kalydeco (Ivacaftor)', minAge: 6, maxAge: 100, quantity: 50, description: '' },
+  { name: 'Orkambi (Lumacaftor/Ivacaftor)', minAge: 2, maxAge: 100, quantity: 80, description: '' },
+  { name: 'Symdeko (Tezacaftor/Ivacaftor)', minAge: 6, maxAge: 100, quantity: 60, description: '' },
+  { name: 'Trikafta (Elexacaftor/Tezacaftor/Ivacaftor)', minAge: 12, maxAge: 100, quantity: 40, description: '' },
+  { name: 'Azithromycin', minAge: 6, maxAge: 100, quantity: 150, description: '' },
+  { name: 'Tobramycin', minAge: 6, maxAge: 100, quantity: 100, description: '' },
+  { name: 'Colistin', minAge: 2, maxAge: 100, quantity: 120, description: '' },
+  { name: 'Vitamin A', minAge: 0, maxAge: 100, quantity: 500, description: '' },
+  { name: 'Vitamin D', minAge: 0, maxAge: 100, quantity: 500, description: '' },
+  { name: 'Vitamin E', minAge: 0, maxAge: 100, quantity: 500, description: '' },
+  { name: 'Vitamin K', minAge: 0, maxAge: 100, quantity: 500, description: '' },
+  { name: 'Ursodeoxycholic acid', minAge: 1, maxAge: 100, quantity: 100, description: '' },
+  { name: 'Paracetamol', minAge: 1, maxAge: 5, quantity: 200, description: 'Yarimta istemol qilinadi' },
+  { name: 'Trimol', minAge: 12, maxAge: 100, quantity: 150, description: '12 yoshdan yuqorisiga' }
 ];
 
 const seedDB = async () => {
@@ -36,7 +36,7 @@ const seedDB = async () => {
 
     // Eski adminni o'chirish va yangisini yaratish
     await User.deleteOne({ phone: 'admin' });
-    
+
     // Admin yaratish - role aniq belgilangan
     const adminData = {
       name: 'Admin',
@@ -47,10 +47,10 @@ const seedDB = async () => {
       is_approved: true,
       can_export: true
     };
-    
+
     const newAdmin = new User(adminData);
     await newAdmin.save();
-    
+
     // Tekshirish
     const savedAdmin = await User.findOne({ phone: 'admin' });
     console.log('Admin yaratildi:');
@@ -60,7 +60,7 @@ const seedDB = async () => {
 
     // Test shifokor yaratish
     await User.deleteOne({ phone: '998901234567' });
-    
+
     const testDoctor = new User({
       name: 'Test Shifokor',
       phone: '998901234567',
@@ -70,7 +70,7 @@ const seedDB = async () => {
       is_approved: true,
       can_export: false
     });
-    
+
     await testDoctor.save();
     console.log('\nTest shifokor yaratildi:');
     console.log('  Telefon: 998901234567');

@@ -181,10 +181,10 @@ router.get('/my-patients', ensureAuthenticated, ensureDoctor, async (req, res) =
 
     // Shifokor tashxis qo'ygan bemorlar
     const patientIds = await Diagnosis.find({ doctor: req.user._id }).distinct('patient');
-    
+
     const total = patientIds.length;
     const totalPages = Math.ceil(total / limit);
-    
+
     const patients = await Patient.find({ _id: { $in: patientIds } })
       .sort({ patient_add_date: -1 })
       .skip(skip)
@@ -193,9 +193,9 @@ router.get('/my-patients', ensureAuthenticated, ensureDoctor, async (req, res) =
 
     // Har bir bemor uchun oxirgi tashxis sanasini olish
     for (let patient of patients) {
-      const lastDiagnosis = await Diagnosis.findOne({ 
-        patient: patient._id, 
-        doctor: req.user._id 
+      const lastDiagnosis = await Diagnosis.findOne({
+        patient: patient._id,
+        doctor: req.user._id
       }).sort({ created_at: -1 });
       patient.lastDiagnosisDate = lastDiagnosis ? lastDiagnosis.created_at : null;
     }
@@ -404,14 +404,14 @@ router.get('/drugs-by-age/:patientId', ensureAuthenticated, ensureDoctor, async 
     if (!patient) {
       return res.status(404).json({ error: 'Bemor topilmadi' });
     }
-    
+
     // Bemor yoshiga mos dorilar
     const drugs = await Drug.find({
       minAge: { $lte: patient.age },
       maxAge: { $gte: patient.age },
       quantity: { $gt: 0 }
     }).sort({ name: 1 }).lean();
-    
+
     res.json({ drugs, patientAge: patient.age });
   } catch (err) {
     console.error(err);
@@ -658,37 +658,59 @@ router.get('/distribution/search-patient', ensureAuthenticated, ensureDoctor, as
   try {
     const search = sanitize(req.query.q || '');
     if (!search) return res.status(400).json({ error: 'Qidiruv so\'zi kerak' });
-    
+
     const patient = await Patient.findOne({
       $or: [
-        { child_pnfl: search }, 
+        { child_pnfl: search },
         { patient_code: { $regex: search, $options: 'i' } }
       ]
     }).lean();
-    
+
     if (!patient) return res.status(404).json({ error: 'Bemor topilmadi' });
-    
-    const drugInventory = await Inventory.find({
-      type: 'drug', 
-      quantity: { $gt: 0 }, 
+
+    // Avval Inventory'dan qidirish
+    let drugInventory = await Inventory.find({
+      type: 'drug',
+      quantity: { $gt: 0 },
       expiryDate: { $gt: new Date() },
-      minAge: { $lte: patient.age }, 
+      minAge: { $lte: patient.age },
       maxAge: { $gte: patient.age }
     }).lean();
-    
+
+    // Agar Inventory bo'sh bo'lsa, Drug katalogidan olish
+    if (drugInventory.length === 0) {
+      const drugs = await Drug.find({
+        minAge: { $lte: patient.age },
+        maxAge: { $gte: patient.age },
+        quantity: { $gt: 0 }
+      }).lean();
+
+      // Drug'larni Inventory formatiga o'tkazish
+      drugInventory = drugs.map(d => ({
+        _id: d._id,
+        type: 'drug',
+        name: d.name,
+        quantity: d.quantity,
+        unit: 'dona',
+        minAge: d.minAge,
+        maxAge: d.maxAge,
+        isDrugCatalog: true // Bu Drug katalogidan ekanligini belgilash
+      }));
+    }
+
     const foodInventory = await Inventory.find({
-      type: 'food', 
-      quantity: { $gt: 0 }, 
+      type: 'food',
+      quantity: { $gt: 0 },
       expiryDate: { $gt: new Date() },
-      minAge: { $lte: patient.age }, 
+      minAge: { $lte: patient.age },
       maxAge: { $gte: patient.age }
     }).lean();
-    
+
     const history = await Distribution.find({ patient: patient._id })
       .sort({ created_at: -1 })
       .limit(20)
       .lean();
-    
+
     res.json({ patient, drugInventory, foodInventory, history });
   } catch (err) {
     console.error(err);
@@ -701,45 +723,66 @@ router.post('/distribution/give', ensureAuthenticated, ensureDoctor, async (req,
   const mongoose = require('mongoose');
   const session = await mongoose.startSession();
   session.startTransaction();
-  
+
   try {
     const { type, patient, items, comment } = req.body;
     if (!patient || !items || items.length === 0) {
       return res.status(400).json({ error: 'Ma\'lumotlar to\'liq emas' });
     }
-    
+
     const distributionItems = [];
     for (const item of items) {
-      const inventory = await Inventory.findOneAndUpdate(
-        { 
-          _id: item.inventory, 
-          quantity: { $gte: item.quantity } 
+      // Avval Inventory'dan qidirish
+      let inventory = await Inventory.findOneAndUpdate(
+        {
+          _id: item.inventory,
+          quantity: { $gte: item.quantity }
         },
         { $inc: { quantity: -item.quantity } },
         { new: true, session }
       );
-      
+
+      // Agar Inventory'da topilmasa, Drug katalogidan qidirish
+      if (!inventory) {
+        const drug = await Drug.findOneAndUpdate(
+          {
+            _id: item.inventory,
+            quantity: { $gte: item.quantity }
+          },
+          { $inc: { quantity: -item.quantity } },
+          { new: true, session }
+        );
+
+        if (drug) {
+          inventory = {
+            _id: drug._id,
+            name: drug.name,
+            unit: 'dona'
+          };
+        }
+      }
+
       if (!inventory) {
         await session.abortTransaction();
         return res.status(400).json({ error: 'Mahsulot topilmadi yoki yetarli emas' });
       }
-      
-      distributionItems.push({ 
-        inventory: inventory._id, 
-        name: inventory.name, 
-        quantity: item.quantity, 
-        unit: inventory.unit 
+
+      distributionItems.push({
+        inventory: inventory._id,
+        name: inventory.name,
+        quantity: item.quantity,
+        unit: inventory.unit || 'dona'
       });
     }
-    
-    await Distribution.create([{ 
-      patient, 
-      type, 
-      items: distributionItems, 
-      comment: sanitize(comment || ''), 
-      givenBy: req.user._id 
+
+    await Distribution.create([{
+      patient,
+      type,
+      items: distributionItems,
+      comment: sanitize(comment || ''),
+      givenBy: req.user._id
     }], { session });
-    
+
     await session.commitTransaction();
     res.json({ success: true });
   } catch (err) {
