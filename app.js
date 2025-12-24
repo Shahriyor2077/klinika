@@ -132,5 +132,5 @@ app.use((err, req, res, next) => {
   res.status(500).render('errors/500', { layout: 'auth' });
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT;
 app.listen(PORT, () => console.log(`Server ${PORT} portda ishlamoqda`));
