@@ -1,0 +1,97 @@
+{{> doctor-sidebar activePage="patients"}}
+
+<div class="main-content">
+    {{> alerts}}
+
+    <div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <h1 class="page-title"><i class="bi bi-people-fill me-2"></i>Bemorlar ro'yxati</h1>
+            <p class="page-subtitle">Jami: {{pagination.total}} ta bemor</p>
+        </div>
+    </div>
+
+    <!-- Filtr -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form action="/doctor/patients" method="GET" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label small text-muted">Qidirish</label>
+                    <input type="text" name="search" class="form-control" placeholder="Ism, PNFL yoki kod..."
+                        value="{{search}}">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small text-muted">Viloyat</label>
+                    <select name="region" class="form-select">
+                        <option value="">Barcha viloyatlar</option>
+                        <option value="andijon" {{selected region "andijon" }}>Andijon</option>
+                        <option value="buxoro" {{selected region "buxoro" }}>Buxoro</option>
+                        <option value="fargona" {{selected region "fargona" }}>Farg'ona</option>
+                        <option value="jizzax" {{selected region "jizzax" }}>Jizzax</option>
+                        <option value="xorazm" {{selected region "xorazm" }}>Xorazm</option>
+                        <option value="namangan" {{selected region "namangan" }}>Namangan</option>
+                        <option value="navoiy" {{selected region "navoiy" }}>Navoiy</option>
+                        <option value="qashqadaryo" {{selected region "qashqadaryo" }}>Qashqadaryo</option>
+                        <option value="samarqand" {{selected region "samarqand" }}>Samarqand</option>
+                        <option value="sirdaryo" {{selected region "sirdaryo" }}>Sirdaryo</option>
+                        <option value="surxondaryo" {{selected region "surxondaryo" }}>Surxondaryo</option>
+                        <option value="toshkent_vil" {{selected region "toshkent_vil" }}>Toshkent viloyati</option>
+                        <option value="toshkent_sh" {{selected region "toshkent_sh" }}>Toshkent shahri</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-primary me-2"><i
+                            class="bi bi-search me-1"></i>Qidirish</button>
+                    <a href="/doctor/patients" class="btn btn-outline-secondary">Tozalash</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Bemorlar jadvali -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Kod</th>
+                            <th>F.I.O</th>
+                            <th>PNFL</th>
+                            <th>Jinsi</th>
+                            <th>Yoshi</th>
+                            <th>Viloyat</th>
+                            <th>Telefon</th>
+                            <th>Amallar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#each patients}}
+                        <tr>
+                            <td><span class="badge bg-primary">{{this.patient_code}}</span></td>
+                            <td class="fw-semibold">{{this.name}}</td>
+                            <td><code>{{this.child_pnfl}}</code></td>
+                            <td>{{getSex this.sex}}</td>
+                            <td>{{this.age}} yosh</td>
+                            <td>{{getRegionName this.region}}</td>
+                            <td>{{this.phone_number}}</td>
+                            <td>
+                                <a href="/doctor/patients/{{this._id}}" class="btn btn-sm btn-primary" title="Batafsil">
+                                    <i class="bi bi-eye me-1"></i>Ko'rish
+                                </a>
+                            </td>
+                        </tr>
+                        {{else}}
+                        <tr>
+                            <td colspan="8" class="text-center text-muted py-4">Bemorlar topilmadi</td>
+                        </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    {{> pagination}}
+</div>
+
+{{> doctor-modals}}

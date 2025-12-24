@@ -1,0 +1,294 @@
+<!-- Bemor qo'shish Modal -->
+<div class="modal fade" id="addPatientModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white" style="border-radius: 24px 24px 0 0;">
+                <h5 class="modal-title fw-bold"><i class="bi bi-person-plus-fill me-2"></i>Yangi bemor qo'shish</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form method="POST" action="/doctor/patients/add">
+                    <div class="row g-4">
+                        <div class="col-lg-4">
+                            <h6 class="text-primary fw-bold mb-3 pb-2 border-bottom"><i
+                                    class="bi bi-person me-2"></i>Asosiy ma'lumotlar</h6>
+                            <div class="form-floating mb-3"><input class="form-control" name="name"
+                                    required><label>Bemor F.I.O *</label></div>
+                            <div class="form-floating mb-3"><input class="form-control" name="card_number"><label>Tibbiy
+                                    karta raqami</label></div>
+                            <div class="form-floating mb-3">
+                                <select class="form-select" name="sex" required>
+                                    <option value="">Tanlang</option>
+                                    <option value="male">Erkak</option>
+                                    <option value="female">Ayol</option>
+                                </select>
+                                <label>Jinsi *</label>
+                            </div>
+                            <div class="form-floating mb-3"><input class="form-control" type="date" name="birthday"
+                                    required><label>Tug'ilgan sana *</label></div>
+                            <div class="form-floating mb-3"><input class="form-control" type="number" name="age" min="0"
+                                    max="150" required><label>Yoshi *</label></div>
+                            <div class="form-floating"><input class="form-control" name="child_pnfl" maxlength="14"
+                                    pattern="\d{14}" title="PNFL 14 ta raqamdan iborat bo'lishi kerak"
+                                    required><label>PNFL (14 raqam) *</label></div>
+                        </div>
+                        <div class="col-lg-4">
+                            <h6 class="text-primary fw-bold mb-3 pb-2 border-bottom"><i
+                                    class="bi bi-people me-2"></i>Ota-ona</h6>
+                            <div class="form-floating mb-3"><input class="form-control" name="mother_name"
+                                    required><label>Ona F.I.O *</label></div>
+                            <div class="form-floating mb-3"><input class="form-control" name="mother_id_number"
+                                    required><label>Ona Passport/ID *</label></div>
+                            <div class="form-floating mb-3"><input class="form-control"
+                                    name="mother_work_place"><label>Ona ish joyi</label></div>
+                            <div class="form-floating mb-3"><input class="form-control" name="father_name"
+                                    required><label>Ota F.I.O *</label></div>
+                            <div class="form-floating mb-3"><input class="form-control" name="father_id_number"
+                                    required><label>Ota Passport/ID *</label></div>
+                            <div class="form-floating"><input class="form-control" name="father_work_place"><label>Ota
+                                    ish joyi</label></div>
+                        </div>
+                        <div class="col-lg-4">
+                            <h6 class="text-primary fw-bold mb-3 pb-2 border-bottom"><i
+                                    class="bi bi-geo-alt me-2"></i>Manzil</h6>
+                            <div class="form-floating mb-3">
+                                <select class="form-select" name="region" required>
+                                    <option value="">Viloyat</option>
+                                    <option value="andijon">Andijon</option>
+                                    <option value="buxoro">Buxoro</option>
+                                    <option value="fargona">Farg'ona</option>
+                                    <option value="jizzax">Jizzax</option>
+                                    <option value="xorazm">Xorazm</option>
+                                    <option value="namangan">Namangan</option>
+                                    <option value="navoiy">Navoiy</option>
+                                    <option value="qashqadaryo">Qashqadaryo</option>
+                                    <option value="samarqand">Samarqand</option>
+                                    <option value="sirdaryo">Sirdaryo</option>
+                                    <option value="surxondaryo">Surxondaryo</option>
+                                    <option value="toshkent_vil">Toshkent viloyati</option>
+                                    <option value="toshkent_sh">Toshkent shahri</option>
+                                </select>
+                                <label>Viloyat *</label>
+                            </div>
+                            <div class="form-floating mb-3"><input class="form-control" name="district"
+                                    required><label>Tuman *</label></div>
+                            <div class="form-floating mb-3"><textarea class="form-control" name="full_address"
+                                    style="height:80px" required></textarea><label>To'liq manzil *</label></div>
+                            <div class="form-floating mb-3"><input class="form-control" name="phone_number"
+                                    required><label>Telefon *</label></div>
+                            <div class="form-floating mb-3"><input class="form-control"
+                                    name="second_number"><label>Qo'shimcha tel</label></div>
+                            <div class="d-flex align-items-center p-3 rounded-3"
+                                style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border: 1px solid #fcd34d;">
+                                <div class="form-check form-switch mb-0">
+                                    <input class="form-check-input" type="checkbox" name="related_marriage"
+                                        id="marriage" style="width: 46px; height: 24px; cursor: pointer;">
+                                </div>
+                                <label class="fw-semibold ms-2 mb-0" for="marriage" style="cursor: pointer;">
+                                    <i class="bi bi-heart-fill text-danger me-1"></i>Qarindoshlar nikohimi?
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-3 border-top text-end">
+                        <button type="button" class="btn btn-light px-4 me-2" data-bs-dismiss="modal">Bekor
+                            qilish</button>
+                        <button type="submit" class="btn btn-primary px-5"><i
+                                class="bi bi-check-lg me-2"></i>Saqlash</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tashxis qo'shish Modal -->
+<div class="modal fade" id="addDiagnosisModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white" style="border-radius: 24px 24px 0 0;">
+                <h5 class="modal-title fw-bold"><i class="bi bi-clipboard2-plus-fill me-2"></i>Yangi tashxis qo'shish
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form method="POST" action="/doctor/diagnosis/add" id="diagnosisForm">
+                    <div class="row g-4">
+                        <div class="col-lg-4">
+                            <h6 class="text-success fw-bold mb-3 pb-2 border-bottom"><i
+                                    class="bi bi-person me-2"></i>Bemor</h6>
+                            <div class="form-floating mb-3"><input type="text" class="form-control" id="pnfl_input"
+                                    placeholder="PNFL"><label>PNFL orqali qidirish</label></div>
+                            <div class="form-floating mb-3">
+                                <select class="form-select" name="patient_id" id="patient_select" required>
+                                    <option value="">Bemorni tanlang...</option>
+                                </select>
+                                <label>Bemor *</label>
+                            </div>
+                            <div id="patientAgeInfo" class="alert alert-info py-2 mb-3" style="display:none;">
+                                <small><i class="bi bi-info-circle me-1"></i>Bemor yoshi: <strong
+                                        id="selectedAge"></strong> yosh</small>
+                            </div>
+                            <div class="row g-2 mb-3">
+                                <div class="col-6">
+                                    <div class="form-floating"><input type="number" step="0.01" class="form-control"
+                                            name="ogirligi" required><label>Vazn (kg) *</label></div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="form-floating"><input type="number" class="form-control" name="boyi"
+                                            required><label>Bo'y (sm) *</label></div>
+                                </div>
+                            </div>
+                            <div class="form-floating"><textarea class="form-control" name="shikoyat"
+                                    style="height:100px" required></textarea><label>Shikoyatlar *</label></div>
+                        </div>
+                        <div class="col-lg-4">
+                            <h6 class="text-success fw-bold mb-3 pb-2 border-bottom"><i
+                                    class="bi bi-clipboard-data me-2"></i>Testlar</h6>
+                            <div class="form-floating mb-3"><input type="text" class="form-control"
+                                    name="spirometriya"><label>Spirometriya</label></div>
+                            <div class="form-floating mb-3"><input type="text" class="form-control"
+                                    name="irt"><label>IRT natijasi</label></div>
+                            <div class="form-floating mb-3"><input type="text" class="form-control"
+                                    name="sweat_test"><label>Sweat test</label></div>
+                            <div class="form-floating"><textarea class="form-control" name="genetik_test"
+                                    style="height:100px"></textarea><label>Genetik test</label></div>
+                        </div>
+                        <div class="col-lg-4">
+                            <h6 class="text-success fw-bold mb-3 pb-2 border-bottom"><i
+                                    class="bi bi-file-medical me-2"></i>Xulosa</h6>
+                            <div class="form-floating mb-3"><textarea class="form-control" name="tashxis"
+                                    style="height:80px" required></textarea><label>Tashxis *</label></div>
+                            <div class="form-floating mb-3"><textarea class="form-control" name="davolash"
+                                    style="height:80px" required></textarea><label>Davolash *</label></div>
+                            <div class="mb-3">
+                                <label class="form-label small text-muted">Dorilar <span id="drugsCount"></span></label>
+                                <select class="form-select" name="dorilar" id="dorilar_select" multiple
+                                    style="height:80px">
+                                </select>
+                                <small class="text-muted">Bemor tanlanganda yoshga mos dorilar ko'rinadi</small>
+                            </div>
+                            <div class="form-floating"><input type="text" class="form-control"
+                                    name="izohlar"><label>Izohlar</label></div>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-3 border-top text-end">
+                        <button type="button" class="btn btn-light px-4 me-2" data-bs-dismiss="modal">Bekor
+                            qilish</button>
+                        <button type="submit" class="btn btn-success px-5"><i
+                                class="bi bi-check-lg me-2"></i>Saqlash</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Modal ochilganda bemorlarni yuklash
+        const diagnosisModal = document.getElementById('addDiagnosisModal');
+        if (diagnosisModal) {
+            diagnosisModal.addEventListener('show.bs.modal', function () {
+                loadPatients();
+            });
+        }
+
+        // PNFL orqali qidirish
+        const pnflInput = document.getElementById('pnfl_input');
+        if (pnflInput) {
+            pnflInput.addEventListener('input', function () {
+                const select = document.getElementById('patient_select');
+                const pnfl = this.value.trim();
+
+                for (let i = 0; i < select.options.length; i++) {
+                    if (select.options[i].getAttribute('data-pnfl') === pnfl) {
+                        select.selectedIndex = i;
+                        select.dispatchEvent(new Event('change'));
+                        this.classList.add('is-valid');
+                        this.classList.remove('is-invalid');
+                        return;
+                    }
+                }
+
+                this.classList.remove('is-valid');
+                if (pnfl.length === 14) {
+                    this.classList.add('is-invalid');
+                }
+            });
+        }
+
+        // Bemor tanlanganda
+        const patientSelect = document.getElementById('patient_select');
+        if (patientSelect) {
+            patientSelect.addEventListener('change', function () {
+                const selectedOption = this.options[this.selectedIndex];
+                const patientAge = parseInt(selectedOption.getAttribute('data-age')) || 0;
+
+                if (this.value && patientAge > 0) {
+                    document.getElementById('selectedAge').textContent = patientAge;
+                    document.getElementById('patientAgeInfo').style.display = 'block';
+                    loadDrugsForAge(patientAge);
+                } else {
+                    document.getElementById('patientAgeInfo').style.display = 'none';
+                }
+            });
+        }
+    });
+
+    async function loadPatients() {
+        try {
+            const res = await fetch('/doctor/patients-list');
+            if (!res.ok) throw new Error('Xatolik');
+            const patients = await res.json();
+
+            const select = document.getElementById('patient_select');
+            if (!select) return;
+
+            // Agar allaqachon bemorlar bo'lsa, qayta yuklamang
+            if (select.options.length > 1) return;
+
+            select.innerHTML = '<option value="">Bemorni tanlang...</option>';
+            patients.forEach(p => {
+                const option = document.createElement('option');
+                option.value = p._id;
+                option.setAttribute('data-pnfl', p.child_pnfl);
+                option.setAttribute('data-age', p.age);
+                option.textContent = `${p.name} (${p.child_pnfl}) - ${p.age} yosh`;
+                select.appendChild(option);
+            });
+
+            console.log('Bemorlar yuklandi:', patients.length);
+        } catch (err) {
+            console.error('Bemorlarni yuklashda xatolik:', err);
+        }
+    }
+
+    async function loadDrugsForAge(age) {
+        try {
+            const res = await fetch('/doctor/drugs-for-age/' + age);
+            if (!res.ok) throw new Error('Xatolik');
+            const drugs = await res.json();
+
+            const select = document.getElementById('dorilar_select');
+            if (!select) return;
+
+            select.innerHTML = '';
+            drugs.forEach(d => {
+                const option = document.createElement('option');
+                option.value = d._id;
+                option.textContent = `${d.name} (${d.minAge}-${d.maxAge} yosh)`;
+                select.appendChild(option);
+            });
+
+            const countSpan = document.getElementById('drugsCount');
+            if (countSpan) {
+                countSpan.textContent = `(${drugs.length} ta mos)`;
+            }
+
+            console.log('Dorilar yuklandi:', drugs.length);
+        } catch (err) {
+            console.error('Dorilarni yuklashda xatolik:', err);
+        }
+    }
+</script>

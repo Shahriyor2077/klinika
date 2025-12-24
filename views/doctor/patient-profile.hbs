@@ -1,0 +1,358 @@
+{{> doctor-sidebar activePage="patients"}}
+
+<div class="main-content">
+    {{> alerts}}
+
+    <!-- Bemor ma'lumotlari -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center"
+            style="border-radius: 12px 12px 0 0;">
+            <h5 class="m-0 text-white">
+                <i class="bi bi-person-fill me-2"></i>{{patient.name}}
+                <span class="badge bg-white text-primary ms-2">{{patient.patient_code}}</span>
+            </h5>
+            <a href="/doctor/patients" class="btn btn-light btn-sm">
+                <i class="bi bi-arrow-left me-1"></i>Orqaga
+            </a>
+        </div>
+        <div class="card-body">
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <small class="text-muted d-block">PNFL</small>
+                        <strong class="fs-5">{{patient.child_pnfl}}</strong>
+                    </div>
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Jinsi</small>
+                        <strong>{{getSex patient.sex}}</strong>
+                    </div>
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Yoshi</small>
+                        <strong>{{patient.age}} yosh</strong>
+                    </div>
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Tug'ilgan sana</small>
+                        <strong>{{formatDate patient.birthday}}</strong>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Viloyat</small>
+                        <strong>{{getRegionName patient.region}}</strong>
+                    </div>
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Tuman</small>
+                        <strong>{{patient.district}}</strong>
+                    </div>
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Manzil</small>
+                        <strong>{{patient.full_address}}</strong>
+                    </div>
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Telefon</small>
+                        <strong>{{patient.phone_number}}</strong>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Ona</small>
+                        <strong>{{patient.mother_name}}</strong>
+                    </div>
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Ota</small>
+                        <strong>{{patient.father_name}}</strong>
+                    </div>
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Qarindosh nikoh</small>
+                        <strong>{{ternary patient.related_marriage "Ha" "Yo'q"}}</strong>
+                    </div>
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Ro'yxatga olingan</small>
+                        <strong>{{formatDate patient.patient_add_date}}</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Birinchi va Oxirgi testlar taqqoslash -->
+    {{#if firstDiagnosis}}
+    <div class="row g-4 mb-4">
+        <!-- Birinchi kelgan -->
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-info text-white">
+                    <h6 class="m-0 text-white"><i class="bi bi-1-circle me-2"></i>Birinchi kelgandagi testlar</h6>
+                    <small>{{formatDate firstDiagnosis.created_at}}</small>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div class="p-3 bg-light rounded">
+                                <small class="text-muted d-block">Vazn</small>
+                                <strong class="fs-4 text-primary">{{firstDiagnosis.ogirligi}}</strong> <small>kg</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-3 bg-light rounded">
+                                <small class="text-muted d-block">Bo'y</small>
+                                <strong class="fs-4 text-primary">{{firstDiagnosis.boyi}}</strong> <small>sm</small>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <small class="text-muted d-block">Spirometriya</small>
+                            <strong>{{firstDiagnosis.spirometriya}}</strong>
+                        </div>
+                        <div class="col-12">
+                            <small class="text-muted d-block">IRT</small>
+                            <strong>{{firstDiagnosis.irt}}</strong>
+                        </div>
+                        <div class="col-12">
+                            <small class="text-muted d-block">Sweat test</small>
+                            <strong>{{firstDiagnosis.sweat_test}}</strong>
+                        </div>
+                        <div class="col-12">
+                            <small class="text-muted d-block">Genetik test</small>
+                            <strong>{{firstDiagnosis.genetik_test}}</strong>
+                        </div>
+                        <div class="col-12">
+                            <small class="text-muted d-block">Tashxis</small>
+                            <strong>{{firstDiagnosis.tashxis}}</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Oxirgi kelgan -->
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-success text-white">
+                    <h6 class="m-0 text-white"><i class="bi bi-arrow-repeat me-2"></i>Oxirgi kelgandagi testlar</h6>
+                    <small>{{formatDate lastDiagnosis.created_at}}</small>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div class="p-3 bg-light rounded">
+                                <small class="text-muted d-block">Vazn</small>
+                                <strong class="fs-4 text-success">{{lastDiagnosis.ogirligi}}</strong> <small>kg</small>
+                                {{#compare lastDiagnosis.ogirligi ">" firstDiagnosis.ogirligi}}
+                                <span class="badge bg-success ms-1"><i class="bi bi-arrow-up"></i></span>
+                                {{/compare}}
+                                {{#compare lastDiagnosis.ogirligi "<" firstDiagnosis.ogirligi}} <span
+                                    class="badge bg-danger ms-1"><i class="bi bi-arrow-down"></i></span>
+                                    {{/compare}}
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-3 bg-light rounded">
+                                <small class="text-muted d-block">Bo'y</small>
+                                <strong class="fs-4 text-success">{{lastDiagnosis.boyi}}</strong> <small>sm</small>
+                                {{#compare lastDiagnosis.boyi ">" firstDiagnosis.boyi}}
+                                <span class="badge bg-success ms-1"><i class="bi bi-arrow-up"></i></span>
+                                {{/compare}}
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <small class="text-muted d-block">Spirometriya</small>
+                            <strong>{{lastDiagnosis.spirometriya}}</strong>
+                        </div>
+                        <div class="col-12">
+                            <small class="text-muted d-block">IRT</small>
+                            <strong>{{lastDiagnosis.irt}}</strong>
+                        </div>
+                        <div class="col-12">
+                            <small class="text-muted d-block">Sweat test</small>
+                            <strong>{{lastDiagnosis.sweat_test}}</strong>
+                        </div>
+                        <div class="col-12">
+                            <small class="text-muted d-block">Genetik test</small>
+                            <strong>{{lastDiagnosis.genetik_test}}</strong>
+                        </div>
+                        <div class="col-12">
+                            <small class="text-muted d-block">Tashxis</small>
+                            <strong>{{lastDiagnosis.tashxis}}</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {{/if}}
+
+    <!-- Barcha tashxislar tarixi -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+            <h6 class="m-0"><i class="bi bi-clipboard2-pulse me-2"></i>Kasallik tarixi ({{length allDiagnoses}} ta)</h6>
+            <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addDiagnosisForPatientModal">
+                <i class="bi bi-plus-lg me-1"></i>Tashxis qo'shish
+            </button>
+        </div>
+        <div class="card-body p-0">
+            {{#if allDiagnoses.length}}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Sana</th>
+                            <th>Shifokor</th>
+                            <th>Tashxis</th>
+                            <th>Vazn/Bo'y</th>
+                            <th>Davolash</th>
+                            <th>Dorilar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#each allDiagnoses}}
+                        <tr>
+                            <td><span class="badge bg-light text-dark">{{formatDate this.created_at}}</span></td>
+                            <td class="text-primary fw-semibold">{{this.doctor.name}}</td>
+                            <td>{{this.tashxis}}</td>
+                            <td><strong>{{this.ogirligi}}</strong> kg / <strong>{{this.boyi}}</strong> sm</td>
+                            <td>{{this.davolash}}</td>
+                            <td>
+                                {{#each this.dorilar}}
+                                <span class="badge bg-info bg-opacity-75 me-1">{{this.name}}</span>
+                                {{/each}}
+                            </td>
+                        </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+            </div>
+            {{else}}
+            <div class="text-center py-4 text-muted">
+                <i class="bi bi-clipboard-x fs-1 d-block mb-2 opacity-25"></i>
+                Hali tashxis qo'yilmagan
+            </div>
+            {{/if}}
+        </div>
+    </div>
+
+    <!-- Dori tarqatish tarixi -->
+    {{#if distributions.length}}
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-light">
+            <h6 class="m-0"><i class="bi bi-box-seam me-2"></i>Olgan dori va oziq-ovqatlar</h6>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-sm mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Sana</th>
+                            <th>Turi</th>
+                            <th>Mahsulotlar</th>
+                            <th>Bergan</th>
+                            <th>Izoh</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#each distributions}}
+                        <tr>
+                            <td>{{formatDate this.created_at}}</td>
+                            <td>
+                                <span class="badge {{#eq this.type 'drug'}}bg-primary{{else}}bg-success{{/eq}}">
+                                    {{#eq this.type 'drug'}}Dori{{else}}Oziq-ovqat{{/eq}}
+                                </span>
+                            </td>
+                            <td>
+                                {{#each this.items}}
+                                <span class="badge bg-light text-dark me-1">{{this.name}} ({{this.quantity}}
+                                    {{this.unit}})</span>
+                                {{/each}}
+                            </td>
+                            <td>{{this.givenBy.name}}</td>
+                            <td><small class="text-muted">{{this.comment}}</small></td>
+                        </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {{/if}}
+</div>
+
+<!-- Tashxis qo'shish Modal (shu bemor uchun) -->
+<div class="modal fade" id="addDiagnosisForPatientModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white" style="border-radius: 24px 24px 0 0;">
+                <h5 class="modal-title fw-bold"><i class="bi bi-clipboard2-plus-fill me-2"></i>{{patient.name}} uchun
+                    tashxis</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form method="POST" action="/doctor/diagnosis/add">
+                    <input type="hidden" name="patient_id" value="{{patient._id}}">
+                    <div class="row g-4">
+                        <div class="col-lg-4">
+                            <h6 class="text-success fw-bold mb-3 pb-2 border-bottom"><i
+                                    class="bi bi-person me-2"></i>Bemor: {{patient.name}}</h6>
+                            <div class="alert alert-info py-2">
+                                <small><i class="bi bi-info-circle me-1"></i>Yoshi: <strong>{{patient.age}}</strong>
+                                    yosh</small>
+                            </div>
+                            <div class="row g-2 mb-3">
+                                <div class="col-6">
+                                    <div class="form-floating"><input type="number" step="0.01" class="form-control"
+                                            name="ogirligi" required><label>Vazn (kg) *</label></div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="form-floating"><input type="number" class="form-control" name="boyi"
+                                            required><label>Bo'y (sm) *</label></div>
+                                </div>
+                            </div>
+                            <div class="form-floating"><textarea class="form-control" name="shikoyat"
+                                    style="height:100px" required></textarea><label>Shikoyatlar *</label></div>
+                        </div>
+                        <div class="col-lg-4">
+                            <h6 class="text-success fw-bold mb-3 pb-2 border-bottom"><i
+                                    class="bi bi-clipboard-data me-2"></i>Testlar</h6>
+                            <div class="form-floating mb-3"><input type="text" class="form-control"
+                                    name="spirometriya"><label>Spirometriya</label></div>
+                            <div class="form-floating mb-3"><input type="text" class="form-control"
+                                    name="irt"><label>IRT natijasi</label></div>
+                            <div class="form-floating mb-3"><input type="text" class="form-control"
+                                    name="sweat_test"><label>Sweat test</label></div>
+                            <div class="form-floating"><textarea class="form-control" name="genetik_test"
+                                    style="height:100px"></textarea><label>Genetik test</label></div>
+                        </div>
+                        <div class="col-lg-4">
+                            <h6 class="text-success fw-bold mb-3 pb-2 border-bottom"><i
+                                    class="bi bi-file-medical me-2"></i>Xulosa</h6>
+                            <div class="form-floating mb-3"><textarea class="form-control" name="tashxis"
+                                    style="height:80px" required></textarea><label>Tashxis *</label></div>
+                            <div class="form-floating mb-3"><textarea class="form-control" name="davolash"
+                                    style="height:80px" required></textarea><label>Davolash *</label></div>
+                            <div class="mb-3">
+                                <label class="form-label small text-muted">Dorilar</label>
+                                <select class="form-select" name="dorilar" multiple style="height:80px">
+                                    {{#each drugs}}
+                                    {{#compare ../patient.age ">=" this.minAge}}
+                                    {{#compare ../patient.age "<=" this.maxAge}} <option value="{{this._id}}">
+                                        {{this.name}} ({{this.minAge}}-{{this.maxAge}} yosh)</option>
+                                        {{/compare}}
+                                        {{/compare}}
+                                        {{/each}}
+                                </select>
+                            </div>
+                            <div class="form-floating"><input type="text" class="form-control"
+                                    name="izohlar"><label>Izohlar</label></div>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-3 border-top text-end">
+                        <button type="button" class="btn btn-light px-4 me-2" data-bs-dismiss="modal">Bekor
+                            qilish</button>
+                        <button type="submit" class="btn btn-success px-5"><i
+                                class="bi bi-check-lg me-2"></i>Saqlash</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{> doctor-modals}}

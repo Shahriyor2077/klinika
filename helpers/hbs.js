@@ -30,6 +30,30 @@ module.exports = {
     }
     return a < b;
   },
+
+  // Compare helper (taqqoslash uchun)
+  compare: function(a, operator, b, options) {
+    let result;
+    a = parseFloat(a) || 0;
+    b = parseFloat(b) || 0;
+    
+    switch (operator) {
+      case '==': result = a == b; break;
+      case '===': result = a === b; break;
+      case '!=': result = a != b; break;
+      case '!==': result = a !== b; break;
+      case '<': result = a < b; break;
+      case '>': result = a > b; break;
+      case '<=': result = a <= b; break;
+      case '>=': result = a >= b; break;
+      default: result = false;
+    }
+    
+    if (options && options.fn) {
+      return result ? options.fn(this) : options.inverse(this);
+    }
+    return result;
+  },
   
   // Sanani formatlash
   formatDate: function(date, format) {

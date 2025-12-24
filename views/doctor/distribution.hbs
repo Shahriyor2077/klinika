@@ -1,0 +1,415 @@
+{{> doctor-sidebar activePage="distribution"}}
+
+<div class="main-content">
+    {{> alerts}}
+
+    <div class="page-header">
+        <h1 class="page-title"><i class="bi bi-box-seam-fill me-2"></i>Dori berish</h1>
+        <p class="page-subtitle">Bemorlarga dori va oziq-ovqat berish</p>
+    </div>
+
+    <div class="row">
+        <!-- Bemor qidirish -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="m-0 text-white"><i class="bi bi-search me-2"></i>Bemor qidirish</h6>
+                </div>
+                <div class="card-body">
+                    <form id="searchPatientForm">
+                        <div class="mb-3">
+                            <label class="form-label">PNFL yoki Kod</label>
+                            <input type="text" id="searchPnfl" class="form-control" placeholder="PNFL yoki M123">
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-search me-2"></i>Qidirish
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Bemor ma'lumotlari -->
+            <div class="card border-0 shadow-sm" id="patientCard" style="display: none;">
+                <div class="card-header bg-success text-white">
+                    <h6 class="m-0 text-white"><i class="bi bi-person me-2"></i>Bemor</h6>
+                </div>
+                <div class="card-body">
+                    <h5 id="patientName" class="fw-bold"></h5>
+                    <p class="mb-1"><small class="text-muted">Kod:</small> <span id="patientCode"></span></p>
+                    <p class="mb-1"><small class="text-muted">Yoshi:</small> <span id="patientAge"></span> yosh</p>
+                    <p class="mb-1"><small class="text-muted">PNFL:</small> <span id="patientPnfl"></span></p>
+                    <input type="hidden" id="patientId">
+                    <input type="hidden" id="patientAgeValue">
+                </div>
+            </div>
+        </div>
+
+        <!-- Berish formasi -->
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm" id="distributionForm" style="display: none;">
+                <div class="card-header bg-light">
+                    <ul class="nav nav-tabs card-header-tabs">
+                        <li class="nav-item">
+                            <a class="nav-link active" data-bs-toggle="tab" href="#drugsTab">
+                                <i class="bi bi-capsule me-1"></i>Dorilar
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#foodTab">
+                                <i class="bi bi-basket me-1"></i>Oziq-ovqat
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body">
+                    <div class="tab-content">
+                        <!-- Dorilar -->
+                        <div class="tab-pane fade show active" id="drugsTab">
+                            <form id="drugDistributionForm">
+                                <input type="hidden" name="type" value="drug">
+                                <input type="hidden" name="patient" id="drugPatientId">
+
+                                <div id="drugItems">
+                                    <div class="drug-item row mb-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Dori</label>
+                                            <select name="items[0][inventory]" class="form-select drug-select" required>
+                                                <option value="">Tanlang...</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">Miqdori</label>
+                                            <input type="number" name="items[0][quantity]" class="form-control" min="1"
+                                                required>
+                                        </div>
+                                        <div class="col-md-2 d-flex align-items-end">
+                                            <button type="button" class="btn btn-danger btn-sm"
+                                                onclick="removeItem(this)" style="display:none;">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button type="button" class="btn btn-outline-primary btn-sm mb-3"
+                                    onclick="addDrugItem()">
+                                    <i class="bi bi-plus me-1"></i>Yana dori qo'shish
+                                </button>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Izoh</label>
+                                    <textarea name="comment" class="form-control" rows="2"
+                                        placeholder="Izoh..."></textarea>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="bi bi-check-lg me-2"></i>Berish
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Oziq-ovqat -->
+                        <div class="tab-pane fade" id="foodTab">
+                            <form id="foodDistributionForm">
+                                <input type="hidden" name="type" value="food">
+                                <input type="hidden" name="patient" id="foodPatientId">
+
+                                <div id="foodItems">
+                                    <div class="food-item row mb-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Oziq-ovqat</label>
+                                            <select name="items[0][inventory]" class="form-select food-select" required>
+                                                <option value="">Tanlang...</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">Miqdori</label>
+                                            <input type="number" name="items[0][quantity]" class="form-control" min="1"
+                                                required>
+                                        </div>
+                                        <div class="col-md-2 d-flex align-items-end">
+                                            <button type="button" class="btn btn-danger btn-sm"
+                                                onclick="removeItem(this)" style="display:none;">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button type="button" class="btn btn-outline-success btn-sm mb-3"
+                                    onclick="addFoodItem()">
+                                    <i class="bi bi-plus me-1"></i>Yana qo'shish
+                                </button>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Izoh</label>
+                                    <textarea name="comment" class="form-control" rows="2"></textarea>
+                                </div>
+
+                                <button type="submit" class="btn btn-success w-100">
+                                    <i class="bi bi-check-lg me-2"></i>Berish
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bemor tarixi -->
+            <div class="card border-0 shadow-sm mt-4" id="historyCard" style="display: none;">
+                <div class="card-header bg-light">
+                    <h6 class="m-0"><i class="bi bi-clock-history me-2"></i>Olgan dori va oziq-ovqatlar</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Sana</th>
+                                    <th>Turi</th>
+                                    <th>Nomi</th>
+                                    <th>Miqdori</th>
+                                    <th>Izoh</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historyBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let drugInventory = [];
+    let foodInventory = [];
+    let patientAge = 0;
+    let drugItemCount = 1;
+    let foodItemCount = 1;
+
+    // Bemor qidirish
+    document.getElementById('searchPatientForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const search = document.getElementById('searchPnfl').value.trim();
+        if (!search) return;
+
+        try {
+            const res = await fetch('/doctor/distribution/search-patient?q=' + encodeURIComponent(search));
+            const data = await res.json();
+
+            if (data.error) {
+                alert(data.error);
+                return;
+            }
+
+            // Bemor ma'lumotlarini ko'rsatish
+            document.getElementById('patientName').textContent = data.patient.name;
+            document.getElementById('patientCode').textContent = data.patient.patient_code;
+            document.getElementById('patientAge').textContent = data.patient.age;
+            document.getElementById('patientPnfl').textContent = data.patient.child_pnfl;
+            document.getElementById('patientId').value = data.patient._id;
+            document.getElementById('patientAgeValue').value = data.patient.age;
+            document.getElementById('drugPatientId').value = data.patient._id;
+            document.getElementById('foodPatientId').value = data.patient._id;
+
+            patientAge = data.patient.age;
+            drugInventory = data.drugInventory || [];
+            foodInventory = data.foodInventory || [];
+
+            console.log('Drug inventory:', drugInventory);
+            console.log('Food inventory:', foodInventory);
+
+            // Selectlarni yangilash
+            updateDrugSelects();
+            updateFoodSelects();
+
+            // Agar omborda dori yo'q bo'lsa xabar
+            if (drugInventory.length === 0) {
+                alert('Omborda bu yoshga mos dori mavjud emas. Admin omborga dori qo\'shishi kerak.');
+            }
+
+            // Tarixni ko'rsatish
+            showHistory(data.history);
+
+            document.getElementById('patientCard').style.display = 'block';
+            document.getElementById('distributionForm').style.display = 'block';
+            document.getElementById('historyCard').style.display = 'block';
+        } catch (err) {
+            alert('Xatolik yuz berdi');
+            console.error(err);
+        }
+    });
+
+    function updateDrugSelects() {
+        const selects = document.querySelectorAll('.drug-select');
+        const filtered = drugInventory;
+
+        selects.forEach(select => {
+            const currentValue = select.value;
+            select.innerHTML = '<option value="">Tanlang...</option>';
+            filtered.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item._id;
+                option.textContent = `${item.name} (${item.quantity} ${item.unit} mavjud)`;
+                if (item._id === currentValue) option.selected = true;
+                select.appendChild(option);
+            });
+        });
+    }
+
+    function updateFoodSelects() {
+        const selects = document.querySelectorAll('.food-select');
+        const filtered = foodInventory;
+
+        selects.forEach(select => {
+            const currentValue = select.value;
+            select.innerHTML = '<option value="">Tanlang...</option>';
+            filtered.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item._id;
+                option.textContent = `${item.name} (${item.quantity} ${item.unit} mavjud)`;
+                if (item._id === currentValue) option.selected = true;
+                select.appendChild(option);
+            });
+        });
+    }
+
+    function addDrugItem() {
+        const container = document.getElementById('drugItems');
+        const html = `
+        <div class="drug-item row mb-3">
+            <div class="col-md-6">
+                <select name="items[${drugItemCount}][inventory]" class="form-select drug-select" required>
+                    <option value="">Tanlang...</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <input type="number" name="items[${drugItemCount}][quantity]" class="form-control" min="1" required>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="button" class="btn btn-danger btn-sm" onclick="removeItem(this)">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </div>
+        </div>
+    `;
+        container.insertAdjacentHTML('beforeend', html);
+        drugItemCount++;
+        updateDrugSelects();
+    }
+
+    function addFoodItem() {
+        const container = document.getElementById('foodItems');
+        const html = `
+        <div class="food-item row mb-3">
+            <div class="col-md-6">
+                <select name="items[${foodItemCount}][inventory]" class="form-select food-select" required>
+                    <option value="">Tanlang...</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <input type="number" name="items[${foodItemCount}][quantity]" class="form-control" min="1" required>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="button" class="btn btn-danger btn-sm" onclick="removeItem(this)">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </div>
+        </div>
+    `;
+        container.insertAdjacentHTML('beforeend', html);
+        foodItemCount++;
+        updateFoodSelects();
+    }
+
+    function removeItem(btn) {
+        btn.closest('.row').remove();
+    }
+
+    function showHistory(history) {
+        const tbody = document.getElementById('historyBody');
+        tbody.innerHTML = '';
+
+        if (!history || history.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Tarix yo\'q</td></tr>';
+            return;
+        }
+
+        history.forEach(dist => {
+            dist.items.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                <td><small>${new Date(dist.created_at).toLocaleDateString('uz-UZ')}</small></td>
+                <td><span class="badge ${dist.type === 'drug' ? 'bg-primary' : 'bg-success'}">${dist.type === 'drug' ? 'Dori' : 'Oziq-ovqat'}</span></td>
+                <td>${item.name}</td>
+                <td>${item.quantity} ${item.unit || 'dona'}</td>
+                <td><small class="text-muted">${dist.comment || '-'}</small></td>
+            `;
+                tbody.appendChild(tr);
+            });
+        });
+    }
+
+    // Form submit
+    document.getElementById('drugDistributionForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        await submitDistribution(this);
+    });
+
+    document.getElementById('foodDistributionForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        await submitDistribution(this);
+    });
+
+    async function submitDistribution(form) {
+        const formData = new FormData(form);
+        const data = {
+            type: formData.get('type'),
+            patient: formData.get('patient'),
+            comment: formData.get('comment'),
+            items: []
+        };
+
+        // Items ni yig'ish
+        const itemSelects = form.querySelectorAll('select[name*="inventory"]');
+        const itemQuantities = form.querySelectorAll('input[name*="quantity"]');
+
+        for (let i = 0; i < itemSelects.length; i++) {
+            if (itemSelects[i].value && itemQuantities[i].value) {
+                data.items.push({
+                    inventory: itemSelects[i].value,
+                    quantity: parseInt(itemQuantities[i].value)
+                });
+            }
+        }
+
+        if (data.items.length === 0) {
+            alert('Kamida bitta mahsulot tanlang');
+            return;
+        }
+
+        try {
+            const res = await fetch('/doctor/distribution/give', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            const result = await res.json();
+
+            if (result.error) {
+                alert(result.error);
+                return;
+            }
+
+            alert('Muvaffaqiyatli berildi!');
+            // Sahifani yangilash
+            document.getElementById('searchPatientForm').dispatchEvent(new Event('submit'));
+        } catch (err) {
+            alert('Xatolik yuz berdi');
+            console.error(err);
+        }
+    }
+</script>

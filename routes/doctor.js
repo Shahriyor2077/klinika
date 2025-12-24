@@ -81,6 +81,97 @@ router.get('/', ensureAuthenticated, ensureDoctor, async (req, res) => {
   }
 });
 
+// Barcha bemorlar ro'yxati (viloyat filtri bilan)
+router.get('/patients', ensureAuthenticated, ensureDoctor, async (req, res) => {
+  try {
+    const { search, region, page = 1 } = req.query;
+    const limit = 20;
+    const skip = (page - 1) * limit;
+    let query = {};
+
+    if (search) {
+      query.$or = [
+        { name: { $regex: sanitize(search), $options: 'i' } },
+        { child_pnfl: { $regex: sanitize(search), $options: 'i' } },
+        { patient_code: { $regex: sanitize(search), $options: 'i' } }
+      ];
+    }
+    if (region) query.region = region;
+
+    const total = await Patient.countDocuments(query);
+    const totalPages = Math.ceil(total / limit);
+    const patients = await Patient.find(query)
+      .sort({ patient_add_date: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
+
+    const drugs = await Drug.find().lean();
+
+    res.render('doctor/patients', {
+      patients,
+      drugs,
+      search,
+      region,
+      pagination: {
+        page: parseInt(page),
+        totalPages,
+        total,
+        hasNext: page < totalPages,
+        hasPrev: page > 1
+      }
+    });
+  } catch (err) {
+    console.error(err);
+    req.flash('error_msg', 'Bemorlarni yuklashda xatolik');
+    res.redirect('/doctor');
+  }
+});
+
+// Bemor profili (birinchi va oxirgi testlar)
+router.get('/patients/:id', ensureAuthenticated, ensureDoctor, async (req, res) => {
+  try {
+    const patient = await Patient.findById(req.params.id).lean();
+    if (!patient) {
+      req.flash('error_msg', 'Bemor topilmadi');
+      return res.redirect('/doctor/patients');
+    }
+
+    // Barcha tashxislar
+    const allDiagnoses = await Diagnosis.find({ patient: req.params.id })
+      .populate('dorilar')
+      .populate('doctor', 'name')
+      .sort({ created_at: 1 })
+      .lean();
+
+    // Birinchi va oxirgi tashxis
+    const firstDiagnosis = allDiagnoses.length > 0 ? allDiagnoses[0] : null;
+    const lastDiagnosis = allDiagnoses.length > 0 ? allDiagnoses[allDiagnoses.length - 1] : null;
+
+    // Dori tarqatish tarixi
+    const distributions = await Distribution.find({ patient: req.params.id })
+      .populate('givenBy', 'name')
+      .sort({ created_at: -1 })
+      .limit(10)
+      .lean();
+
+    const drugs = await Drug.find().lean();
+
+    res.render('doctor/patient-profile', {
+      patient,
+      allDiagnoses,
+      firstDiagnosis,
+      lastDiagnosis,
+      distributions,
+      drugs
+    });
+  } catch (err) {
+    console.error(err);
+    req.flash('error_msg', 'Bemor ma\'lumotlarini yuklashda xatolik');
+    res.redirect('/doctor/patients');
+  }
+});
+
 // Mening bemorlarim
 router.get('/my-patients', ensureAuthenticated, ensureDoctor, async (req, res) => {
   try {
@@ -274,6 +365,35 @@ router.post('/diagnosis/add', ensureAuthenticated, ensureDoctor, async (req, res
     console.error(err);
     req.flash('error_msg', `Tashxis saqlashda xato: ${err.message}`);
     res.redirect('/doctor');
+  }
+});
+
+// Bemorlar ro'yxati (AJAX uchun)
+router.get('/patients-list', ensureAuthenticated, ensureDoctor, async (req, res) => {
+  try {
+    const patients = await Patient.find()
+      .select('_id name child_pnfl age')
+      .sort({ name: 1 })
+      .lean();
+    res.json(patients);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json([]);
+  }
+});
+
+// Yoshga mos dorilar (AJAX uchun)
+router.get('/drugs-for-age/:age', ensureAuthenticated, ensureDoctor, async (req, res) => {
+  try {
+    const age = parseInt(req.params.age) || 0;
+    const drugs = await Drug.find({
+      minAge: { $lte: age },
+      maxAge: { $gte: age }
+    }).sort({ name: 1 }).lean();
+    res.json(drugs);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json([]);
   }
 });
 
@@ -518,6 +638,116 @@ router.get('/export', ensureAuthenticated, ensureDoctor, async (req, res) => {
     console.error(err);
     req.flash('error_msg', 'Excel yaratishda xatolik');
     res.redirect('/doctor');
+  }
+});
+
+// ==================== DORI BERISH ====================
+// Dori berish sahifasi
+router.get('/distribution', ensureAuthenticated, ensureDoctor, async (req, res) => {
+  try {
+    res.render('doctor/distribution');
+  } catch (err) {
+    console.error(err);
+    req.flash('error_msg', 'Xatolik');
+    res.redirect('/doctor');
+  }
+});
+
+// Bemor qidirish (dori berish uchun)
+router.get('/distribution/search-patient', ensureAuthenticated, ensureDoctor, async (req, res) => {
+  try {
+    const search = sanitize(req.query.q || '');
+    if (!search) return res.status(400).json({ error: 'Qidiruv so\'zi kerak' });
+    
+    const patient = await Patient.findOne({
+      $or: [
+        { child_pnfl: search }, 
+        { patient_code: { $regex: search, $options: 'i' } }
+      ]
+    }).lean();
+    
+    if (!patient) return res.status(404).json({ error: 'Bemor topilmadi' });
+    
+    const drugInventory = await Inventory.find({
+      type: 'drug', 
+      quantity: { $gt: 0 }, 
+      expiryDate: { $gt: new Date() },
+      minAge: { $lte: patient.age }, 
+      maxAge: { $gte: patient.age }
+    }).lean();
+    
+    const foodInventory = await Inventory.find({
+      type: 'food', 
+      quantity: { $gt: 0 }, 
+      expiryDate: { $gt: new Date() },
+      minAge: { $lte: patient.age }, 
+      maxAge: { $gte: patient.age }
+    }).lean();
+    
+    const history = await Distribution.find({ patient: patient._id })
+      .sort({ created_at: -1 })
+      .limit(20)
+      .lean();
+    
+    res.json({ patient, drugInventory, foodInventory, history });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Xatolik' });
+  }
+});
+
+// Dori/oziq-ovqat berish
+router.post('/distribution/give', ensureAuthenticated, ensureDoctor, async (req, res) => {
+  const mongoose = require('mongoose');
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  
+  try {
+    const { type, patient, items, comment } = req.body;
+    if (!patient || !items || items.length === 0) {
+      return res.status(400).json({ error: 'Ma\'lumotlar to\'liq emas' });
+    }
+    
+    const distributionItems = [];
+    for (const item of items) {
+      const inventory = await Inventory.findOneAndUpdate(
+        { 
+          _id: item.inventory, 
+          quantity: { $gte: item.quantity } 
+        },
+        { $inc: { quantity: -item.quantity } },
+        { new: true, session }
+      );
+      
+      if (!inventory) {
+        await session.abortTransaction();
+        return res.status(400).json({ error: 'Mahsulot topilmadi yoki yetarli emas' });
+      }
+      
+      distributionItems.push({ 
+        inventory: inventory._id, 
+        name: inventory.name, 
+        quantity: item.quantity, 
+        unit: inventory.unit 
+      });
+    }
+    
+    await Distribution.create([{ 
+      patient, 
+      type, 
+      items: distributionItems, 
+      comment: sanitize(comment || ''), 
+      givenBy: req.user._id 
+    }], { session });
+    
+    await session.commitTransaction();
+    res.json({ success: true });
+  } catch (err) {
+    await session.abortTransaction();
+    console.error(err);
+    res.status(500).json({ error: 'Xatolik' });
+  } finally {
+    session.endSession();
   }
 });
 
