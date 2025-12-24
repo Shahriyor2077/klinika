@@ -42,30 +42,50 @@ router.get('/doctor/login', ensureGuest, (req, res) => {
   res.render('auth/doctor-login', { layout: 'auth' });
 });
 
-router.post('/doctor/login', loginLimiter, (req, res, next) => {
-  passport.authenticate('local', (err, user, info) => {
-    if (err) return next(err);
-
+router.post('/doctor/login', loginLimiter, async (req, res, next) => {
+  try {
+    const { phone, password } = req.body;
+    
+    // Foydalanuvchini topish
+    const user = await User.findOne({ phone: phone.replace(/\s/g, '') });
+    
     if (!user) {
-      req.flash('error_msg', info.message);
+      req.flash('error_msg', 'Telefon raqam yoki parol noto\'g\'ri');
       return res.redirect('/auth/doctor/login');
     }
-
+    
+    // Parolni tekshirish
+    const isMatch = await user.matchPassword(password);
+    if (!isMatch) {
+      req.flash('error_msg', 'Telefon raqam yoki parol noto\'g\'ri');
+      return res.redirect('/auth/doctor/login');
+    }
+    
+    // Rol tekshirish
     if (user.role !== 'doctor') {
       req.flash('error_msg', 'Bu sahifa faqat shifokorlar uchun');
       return res.redirect('/auth/doctor/login');
     }
-
+    
+    // Tasdiqlanmagan bo'lsa - login qilmasdan pending sahifasini ko'rsatish
+    if (!user.is_approved) {
+      return res.render('auth/pending', { 
+        layout: 'auth',
+        user: { name: user.name }
+      });
+    }
+    
+    // Tasdiqlangan - login qilish
     req.logIn(user, (err) => {
       if (err) return next(err);
-
-      if (!user.is_approved) {
-        return res.redirect('/auth/pending');
-      }
-
       return res.redirect('/doctor');
     });
-  })(req, res, next);
+    
+  } catch (err) {
+    console.error(err);
+    req.flash('error_msg', 'Xatolik yuz berdi');
+    res.redirect('/auth/doctor/login');
+  }
 });
 
 // ==================== DOCTOR REGISTER ====================
@@ -213,8 +233,12 @@ router.post('/doctor/verify-otp', async (req, res) => {
     // OTP ni o'chirish
     await Otp.deleteMany({ phone });
 
-    req.flash('success_msg', 'Ro\'yxatdan o\'tdingiz! Admin tasdiqlashini kuting.');
-    res.redirect('/auth/doctor/login');
+    // To'g'ridan-to'g'ri pending sahifasini ko'rsatish
+    res.render('auth/pending', { 
+      layout: 'auth',
+      user: { name: newUser.name },
+      isNewUser: true
+    });
 
   } catch (err) {
     console.error(err);
@@ -231,6 +255,35 @@ router.post('/doctor/resend-otp', otpLimiter, async (req, res) => {
     // Eski OTP ni topish
     const oldOtp = await Otp.findOne({ phone, session_token: sessionToken });
     if (!oldOtp || !oldOtp.temp_data) {
+      // Sessiya tugagan - lekin phone bilan qayta urinish
+      const anyOtp = await Otp.findOne({ phone });
+      if (anyOtp && anyOtp.temp_data) {
+        // Yangi kod yuborish
+        const otpCode = generateOtp();
+        const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
+        const newSessionToken = crypto.randomBytes(32).toString('hex');
+
+        await Otp.deleteMany({ phone });
+        await Otp.create({
+          phone,
+          code: otpCode,
+          expires_at: expiresAt,
+          session_token: newSessionToken,
+          temp_data: anyOtp.temp_data
+        });
+
+        const template = process.env.SMS_TEMPLATE || 'Kod: {otp}';
+        const message = template.replace('{otp}', otpCode);
+        await sendSms(phone, message);
+
+        return res.render('auth/verify-otp', {
+          layout: 'auth',
+          phone,
+          sessionToken: newSessionToken,
+          success_msg: 'Yangi kod yuborildi'
+        });
+      }
+      
       req.flash('error_msg', 'Sessiya muddati tugagan. Qaytadan ro\'yxatdan o\'ting.');
       return res.redirect('/auth/doctor/register');
     }
