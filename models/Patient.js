@@ -91,16 +91,32 @@ const PatientSchema = new mongoose.Schema({
   }
 });
 
-// Avtomatik patient_code yaratish
+// Avtomatik patient_code yaratish (atomic)
 PatientSchema.pre('save', async function(next) {
   if (!this.patient_code) {
-    const lastPatient = await this.constructor.findOne().sort({ _id: -1 });
-    let newNumber = 1;
-    if (lastPatient && lastPatient.patient_code) {
-      const lastNumber = parseInt(lastPatient.patient_code.replace('M', ''));
-      newNumber = lastNumber + 1;
+    // Race condition oldini olish uchun retry logic
+    let attempts = 0;
+    const maxAttempts = 5;
+    
+    while (attempts < maxAttempts) {
+      try {
+        const lastPatient = await this.constructor.findOne({}, { patient_code: 1 })
+          .sort({ patient_code: -1 })
+          .collation({ locale: 'en_US', numericOrdering: true });
+        
+        let newNumber = 1;
+        if (lastPatient && lastPatient.patient_code) {
+          const lastNumber = parseInt(lastPatient.patient_code.replace('M', '')) || 0;
+          newNumber = lastNumber + 1;
+        }
+        this.patient_code = `M${newNumber}`;
+        break;
+      } catch (err) {
+        attempts++;
+        if (attempts >= maxAttempts) throw err;
+        await new Promise(r => setTimeout(r, 100 * attempts));
+      }
     }
-    this.patient_code = `M${newNumber}`;
   }
   next();
 });

@@ -565,23 +565,56 @@ router.get('/distribution/search-patient', ensureAuthenticated, ensureAdmin, asy
 });
 
 router.post('/distribution/give', ensureAuthenticated, ensureAdmin, async (req, res) => {
+  const session = await require('mongoose').startSession();
+  session.startTransaction();
+  
   try {
     const { type, patient, items, comment } = req.body;
-    if (!patient || !items || items.length === 0) return res.status(400).json({ error: 'Ma\'lumotlar to\'liq emas' });
+    if (!patient || !items || items.length === 0) {
+      return res.status(400).json({ error: 'Ma\'lumotlar to\'liq emas' });
+    }
+    
     const distributionItems = [];
     for (const item of items) {
-      const inventory = await Inventory.findById(item.inventory);
-      if (!inventory) return res.status(400).json({ error: 'Mahsulot topilmadi' });
-      if (inventory.quantity < item.quantity) return res.status(400).json({ error: `${inventory.name} yetarli emas. Mavjud: ${inventory.quantity}` });
-      inventory.quantity -= item.quantity;
-      await inventory.save();
-      distributionItems.push({ inventory: inventory._id, name: inventory.name, quantity: item.quantity, unit: inventory.unit });
+      // Atomic update bilan race condition oldini olish
+      const inventory = await Inventory.findOneAndUpdate(
+        { 
+          _id: item.inventory, 
+          quantity: { $gte: item.quantity } 
+        },
+        { $inc: { quantity: -item.quantity } },
+        { new: true, session }
+      );
+      
+      if (!inventory) {
+        await session.abortTransaction();
+        return res.status(400).json({ error: `Mahsulot topilmadi yoki yetarli emas` });
+      }
+      
+      distributionItems.push({ 
+        inventory: inventory._id, 
+        name: inventory.name, 
+        quantity: item.quantity, 
+        unit: inventory.unit 
+      });
     }
-    await Distribution.create({ patient, type, items: distributionItems, comment: sanitize(comment || ''), givenBy: req.user._id });
+    
+    await Distribution.create([{ 
+      patient, 
+      type, 
+      items: distributionItems, 
+      comment: sanitize(comment || ''), 
+      givenBy: req.user._id 
+    }], { session });
+    
+    await session.commitTransaction();
     res.json({ success: true });
   } catch (err) {
+    await session.abortTransaction();
     console.error(err);
     res.status(500).json({ error: 'Xatolik' });
+  } finally {
+    session.endSession();
   }
 });
 

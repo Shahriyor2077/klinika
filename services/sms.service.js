@@ -47,7 +47,7 @@ async function sendSms(phone, message) {
     });
     
     // Development rejimda SMS yuborilmasa ham davom etish
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV !== 'production') {
       console.log('DEV MODE: SMS o\'tkazib yuborildi, OTP:', message);
       return { success: true, data: { dev_mode: true } };
     }

@@ -23,7 +23,17 @@ require('./config/passport')(passport);
 // MongoDB ulanish
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('MongoDB ulandi'))
-  .catch(err => console.error('MongoDB xatosi:', err));
+  .catch(err => {
+    console.error('MongoDB xatosi:', err);
+    process.exit(1); // Production'da DB ulanmasa to'xtash
+  });
+
+// Graceful shutdown
+process.on('SIGTERM', async () => {
+  console.log('SIGTERM signal qabul qilindi');
+  await mongoose.connection.close();
+  process.exit(0);
+});
 
 // Helmet - xavfsizlik headerlari
 app.use(helmet({
@@ -71,9 +81,12 @@ app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
-  store: MongoStore.create({ mongoUrl: process.env.MONGODB_URI }),
+  store: MongoStore.create({ 
+    mongoUrl: process.env.MONGODB_URI,
+    touchAfter: 24 * 3600 // 24 soatda 1 marta yangilash
+  }),
   cookie: {
-    secure: process.env.NODE_ENV === 'production' && process.env.HTTPS === 'true',
+    secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
     sameSite: 'lax',
     maxAge: 24 * 60 * 60 * 1000 // 1 kun
@@ -110,7 +123,12 @@ app.use((req, res) => {
 
 // Error handler
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  // Production'da xato tafsilotlarini yashirish
+  if (process.env.NODE_ENV === 'production') {
+    console.error('Error:', err.message);
+  } else {
+    console.error(err.stack);
+  }
   res.status(500).render('errors/500', { layout: 'auth' });
 });
 
