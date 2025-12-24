@@ -11,7 +11,8 @@
     </div>
     <div class="form-group">
         <label>Telefon raqam</label>
-        <input type="text" name="phone" placeholder="+998 90 123 45 67" value="{{phone}}" required>
+        <input type="tel" name="phone" value="{{#if phone}}{{phone}}{{else}}+998{{/if}}" placeholder="+998901234567"
+            required>
     </div>
     <div class="form-group">
         <label>Ish joyi</label>
