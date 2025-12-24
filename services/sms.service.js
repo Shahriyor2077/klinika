@@ -12,6 +12,8 @@ async function sendSms(phone, message) {
       formattedPhone = '998' + formattedPhone;
     }
 
+    console.log('SMS yuborilmoqda:', formattedPhone, message);
+
     const response = await axios.post(
       process.env.SMS_SERVICE_URL,
       {
@@ -23,14 +25,33 @@ async function sendSms(phone, message) {
         headers: {
           'Authorization': `Bearer ${process.env.SMS_TOKEN}`,
           'Content-Type': 'application/json'
-        }
+        },
+        timeout: 10000
       }
     );
 
-    console.log('SMS yuborildi:', formattedPhone);
-    return { success: true, data: response.data };
+    console.log('SMS javob:', response.data);
+    
+    // Eskiz API muvaffaqiyatli javob
+    if (response.data && (response.data.status === 'success' || response.data.id)) {
+      return { success: true, data: response.data };
+    }
+    
+    // Xato javob
+    return { success: false, error: response.data };
   } catch (error) {
-    console.error('SMS xatosi:', error.response?.data || error.message);
+    console.error('SMS xatosi:', {
+      status: error.response?.status,
+      data: error.response?.data,
+      message: error.message
+    });
+    
+    // Development rejimda SMS yuborilmasa ham davom etish
+    if (process.env.NODE_ENV === 'development') {
+      console.log('DEV MODE: SMS o\'tkazib yuborildi, OTP:', message);
+      return { success: true, data: { dev_mode: true } };
+    }
+    
     return { success: false, error: error.response?.data || error.message };
   }
 }

@@ -58,13 +58,15 @@ router.get('/users', ensureAuthenticated, ensureAdmin, async (req, res) => {
 // Foydalanuvchini tasdiqlash
 router.post('/users/approve/:id', ensureAuthenticated, ensureAdmin, async (req, res) => {
   try {
-    const user = await User.findById(req.params.id);
+    const user = await User.findByIdAndUpdate(
+      req.params.id, 
+      { is_approved: true },
+      { new: true }
+    );
     if (!user) {
       req.flash('error_msg', 'Foydalanuvchi topilmadi');
       return res.redirect('/admin/users');
     }
-    user.is_approved = true;
-    await user.save({ validateBeforeSave: false });
     req.flash('success_msg', `${user.name} tasdiqlandi`);
     res.redirect('/admin/users');
   } catch (err) {

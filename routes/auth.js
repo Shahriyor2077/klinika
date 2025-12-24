@@ -216,19 +216,17 @@ router.post('/doctor/verify-otp', async (req, res) => {
       });
     }
 
-    // Foydalanuvchini yaratish (parol allaqachon hash qilingan)
-    const newUser = new User({
+    // Foydalanuvchini to'g'ridan-to'g'ri yaratish (pre-save hook ni chetlab o'tish)
+    const newUser = await User.collection.insertOne({
       name: otpRecord.temp_data.name,
       phone,
-      password: 'temp', // Pre-save hook ishlamasligi uchun
+      password: otpRecord.temp_data.password_hash, // allaqachon hash qilingan
       address: otpRecord.temp_data.address,
       role: 'doctor',
-      is_approved: false
+      is_approved: false,
+      can_export: false,
+      created_at: new Date()
     });
-
-    // Hash qilingan parolni to'g'ridan-to'g'ri saqlash
-    newUser.password = otpRecord.temp_data.password_hash;
-    await newUser.save({ validateBeforeSave: false });
 
     // OTP ni o'chirish
     await Otp.deleteMany({ phone });
@@ -236,7 +234,7 @@ router.post('/doctor/verify-otp', async (req, res) => {
     // To'g'ridan-to'g'ri pending sahifasini ko'rsatish
     res.render('auth/pending', { 
       layout: 'auth',
-      user: { name: newUser.name },
+      user: { name: otpRecord.temp_data.name },
       isNewUser: true
     });
 
