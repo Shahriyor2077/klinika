@@ -186,11 +186,17 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // Modal ochilganda bemorlarni yuklash
+        // Sahifa yuklanganda bemorlarni yuklash
+        loadPatients();
+
+        // Modal ochilganda ham yuklash (agar hali yuklanmagan bo'lsa)
         const diagnosisModal = document.getElementById('addDiagnosisModal');
         if (diagnosisModal) {
             diagnosisModal.addEventListener('show.bs.modal', function () {
-                loadPatients();
+                const select = document.getElementById('patient_select');
+                if (select && select.options.length <= 1) {
+                    loadPatients();
+                }
             });
         }
 
@@ -238,15 +244,15 @@
 
     async function loadPatients() {
         try {
-            const res = await fetch('/doctor/patients-list');
-            if (!res.ok) throw new Error('Xatolik');
-            const patients = await res.json();
-
             const select = document.getElementById('patient_select');
             if (!select) return;
 
             // Agar allaqachon bemorlar bo'lsa, qayta yuklamang
             if (select.options.length > 1) return;
+
+            const res = await fetch('/doctor/patients-list');
+            if (!res.ok) throw new Error('Xatolik');
+            const patients = await res.json();
 
             select.innerHTML = '<option value="">Bemorni tanlang...</option>';
             patients.forEach(p => {

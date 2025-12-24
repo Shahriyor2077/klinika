@@ -4,7 +4,7 @@
     {{> alerts}}
 
     <div class="page-header">
-        <h1 class="page-title"><i class="bi bi-people-fill me-2"></i>Mening bemorlarim</h1>
+        <h1 class="page-title"><i class="bi bi-person-check-fill me-2"></i>Mening bemorlarim</h1>
         <p class="page-subtitle">Siz tashxis qo'ygan bemorlar ro'yxati</p>
     </div>
 
@@ -67,96 +67,4 @@
     </div>
 </div>
 
-<!-- Bemor qo'shish Modal (dashboard bilan bir xil) -->
-<div class="modal fade" id="addPatientModal" tabindex="-1">
-    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header bg-primary text-white" style="border-radius: 24px 24px 0 0;">
-                <h5 class="modal-title fw-bold"><i class="bi bi-person-plus-fill me-2"></i>Yangi bemor qo'shish</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body p-4">
-                <form method="POST" action="/doctor/patients/add">
-                    <div class="row g-4">
-                        <div class="col-lg-4">
-                            <h6 class="text-primary fw-bold mb-3 pb-2 border-bottom">Asosiy ma'lumotlar</h6>
-                            <div class="form-floating mb-3"><input class="form-control" name="name"
-                                    required><label>Bemor F.I.O *</label></div>
-                            <div class="form-floating mb-3"><input class="form-control" name="card_number"><label>Tibbiy
-                                    karta raqami</label></div>
-                            <div class="form-floating mb-3">
-                                <select class="form-select" name="sex" required>
-                                    <option value="">Tanlang</option>
-                                    <option value="male">Erkak</option>
-                                    <option value="female">Ayol</option>
-                                </select>
-                                <label>Jinsi *</label>
-                            </div>
-                            <div class="form-floating mb-3"><input class="form-control" type="date" name="birthday"
-                                    required><label>Tug'ilgan sana *</label></div>
-                            <div class="form-floating mb-3"><input class="form-control" type="number" name="age" min="0"
-                                    max="150" required><label>Yoshi *</label></div>
-                            <div class="form-floating"><input class="form-control" name="child_pnfl" maxlength="14"
-                                    pattern="\d{14}" required><label>PNFL (14 raqam) *</label></div>
-                        </div>
-                        <div class="col-lg-4">
-                            <h6 class="text-primary fw-bold mb-3 pb-2 border-bottom">Ota-ona</h6>
-                            <div class="form-floating mb-3"><input class="form-control" name="mother_name"
-                                    required><label>Ona F.I.O *</label></div>
-                            <div class="form-floating mb-3"><input class="form-control" name="mother_id_number"
-                                    required><label>Ona Passport/ID *</label></div>
-                            <div class="form-floating mb-3"><input class="form-control"
-                                    name="mother_work_place"><label>Ona ish joyi</label></div>
-                            <div class="form-floating mb-3"><input class="form-control" name="father_name"
-                                    required><label>Ota F.I.O *</label></div>
-                            <div class="form-floating mb-3"><input class="form-control" name="father_id_number"
-                                    required><label>Ota Passport/ID *</label></div>
-                            <div class="form-floating"><input class="form-control" name="father_work_place"><label>Ota
-                                    ish joyi</label></div>
-                        </div>
-                        <div class="col-lg-4">
-                            <h6 class="text-primary fw-bold mb-3 pb-2 border-bottom">Manzil</h6>
-                            <div class="form-floating mb-3">
-                                <select class="form-select" name="region" required>
-                                    <option value="">Viloyat</option>
-                                    <option value="andijon">Andijon</option>
-                                    <option value="buxoro">Buxoro</option>
-                                    <option value="fargona">Farg'ona</option>
-                                    <option value="jizzax">Jizzax</option>
-                                    <option value="xorazm">Xorazm</option>
-                                    <option value="namangan">Namangan</option>
-                                    <option value="navoiy">Navoiy</option>
-                                    <option value="qashqadaryo">Qashqadaryo</option>
-                                    <option value="samarqand">Samarqand</option>
-                                    <option value="sirdaryo">Sirdaryo</option>
-                                    <option value="surxondaryo">Surxondaryo</option>
-                                    <option value="toshkent_vil">Toshkent viloyati</option>
-                                    <option value="toshkent_sh">Toshkent shahri</option>
-                                </select>
-                                <label>Viloyat *</label>
-                            </div>
-                            <div class="form-floating mb-3"><input class="form-control" name="district"
-                                    required><label>Tuman *</label></div>
-                            <div class="form-floating mb-3"><textarea class="form-control" name="full_address"
-                                    style="height:80px" required></textarea><label>To'liq manzil *</label></div>
-                            <div class="form-floating mb-3"><input class="form-control" name="phone_number"
-                                    required><label>Telefon *</label></div>
-                            <div class="form-floating mb-3"><input class="form-control"
-                                    name="second_number"><label>Qo'shimcha tel</label></div>
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" name="related_marriage" id="marriage2">
-                                <label class="form-check-label" for="marriage2">Qarindoshlar nikohimi?</label>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mt-4 pt-3 border-top text-end">
-                        <button type="button" class="btn btn-light px-4 me-2" data-bs-dismiss="modal">Bekor
-                            qilish</button>
-                        <button type="submit" class="btn btn-primary px-5"><i
-                                class="bi bi-check-lg me-2"></i>Saqlash</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
+{{> doctor-modals}}
