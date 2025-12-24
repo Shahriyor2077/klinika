@@ -511,7 +511,7 @@ router.get('/export', ensureAuthenticated, ensureDoctor, async (req, res) => {
 
     // Excel faylni yuborish
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    res.setHeader('Content-Disposition', `attachment; filename=mukovatsidoz_hisobot_${Date.now()}.xlsx`);
+    res.setHeader('Content-Disposition', `attachment; filename=orfan_hisobot_${Date.now()}.xlsx`);
     await workbook.xlsx.write(res);
     res.end();
   } catch (err) {

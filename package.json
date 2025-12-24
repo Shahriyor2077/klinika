@@ -1,7 +1,7 @@
 {
-  "name": "mukovatsidoz",
+  "name": "orfan-uz",
   "version": "1.0.0",
-  "description": "Mukovatsidoz bemorlarni ro'yxatga olish tizimi",
+  "description": "ORFAN.UZ - Bemorlarni ro'yxatga olish tizimi",
   "main": "app.js",
   "engines": {
     "node": ">=18.0.0"

@@ -1,4 +1,4 @@
-# Mukovatsidoz - Bemorlarni ro'yxatga olish tizimi
+# ORFAN.UZ - Bemorlarni ro'yxatga olish tizimi
 
 Express.js + Handlebars + MongoDB
 
